@@ -1,5 +1,6 @@
-
 .env
+Access Token.txt
+swagger.txt
 venv/
 .venv/
 env/
