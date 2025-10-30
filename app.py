@@ -20,26 +20,24 @@ EXPIRED_DATE = os.getenv("EXPIRED_DATE")
 def generate_vc():
     try:
         data = request.get_json()
-        studentId = data.get('student')
+        student = data.get('student')
         name = data.get('name')
-        className = data.get('class')
-        grade = data.get('grade')
+        class_name = data.get('class')
 
-        if not (studentId and name and className and grade):
+        if not (student and name and class_name):
             return jsonify({'error': '所有欄位皆為必填'}), 400
 
         schema = {
-            "vcUid": VC_UID,  
+            "vcUid": VC_UID,
             "issuanceDate": ISSUANCE_DATE,
             "expiredDate": EXPIRED_DATE,
             "fields": [
-                {"ename": "student", "content": studentId},
+                {"ename": "student", "content": student},
                 {"ename": "name", "content": name},
-                {"ename": "class", "content": className},
+                {"ename": "class", "content": class_name},
             ]
         }
 
-        # 呼叫API
         headers = {
             'Access-Token': ACCESS_TOKEN,
             'Content-Type': 'application/json',
@@ -58,11 +56,12 @@ def generate_vc():
         return jsonify({
             'success': True,
             'transactionId': transaction_id,
-            'qrCode': result.get('qrCode'),  # base64
+            'qrCode': result.get('qrCode'),
             'deepLink': result.get('deepLink')
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/', methods=['GET'])
 def serve_index():
