@@ -6,68 +6,43 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-  <div class="container mt-5" style="max-width: 500px;">
-    <h2 class="mb-4 text-center">短期通行憑證發行（Flask Demo）</h2>
+  <div class="container mt-5" style="max-width: 400px;">
+    <h2 class="mb-4 text-center">發行憑證（僅出生年月日）</h2>
     <form id="vcForm">
-      <div class="mb-3">
-        <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="name" required placeholder="王小明">
-      </div>
       <div class="mb-3">
         <label for="roc_birthday" class="form-label">民國出生年月日 <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="roc_birthday" required placeholder="0900101">
         <div class="form-text">格式：民國年份+月份+日期，共7碼（例：民國90年1月1日＝0900101）</div>
       </div>
-      <div class="mb-3">
-        <label for="id_number" class="form-label">身分證字號 <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="id_number" required placeholder="A123456789" pattern="[A-Z]\d{9}">
-      </div>
-      <div class="mb-3">
-        <label for="pass_status" class="form-label">通行身份 <span class="text-danger">*</span></label>
-        <select class="form-select" id="pass_status" required>
-          <option value="">請選擇</option>
-          <option value="訪客">訪客</option>
-          <option value="臨時人員">臨時人員</option>
-          <option value="廠商">廠商</option>
-          <option value="維修人員">維修人員</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="pass_id" class="form-label">通行編號 <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="pass_id" required placeholder="ACC20251030001">
-      </div>
-      <button type="submit" class="btn btn-primary w-100">送出並產生 QR Code</button>
+      <button type="submit" class="btn btn-primary w-100">送出產生 QRCode</button>
     </form>
     <div id="result" class="mt-4"></div>
   </div>
   <script>
     document.getElementById("vcForm").addEventListener("submit", function(event) {
       event.preventDefault();
-      const data = {
-        name: document.getElementById("name").value,
-        roc_birthday: document.getElementById("roc_birthday").value,
-        id_number: document.getElementById("id_number").value,
-        pass_status: document.getElementById("pass_status").value,
-        pass_id: document.getElementById("pass_id").value
-      };
+      const roc_birthday = document.getElementById("roc_birthday").value;
       fetch("/api/generate-vc", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({content: data.roc_birthday})
+        body: JSON.stringify({content: roc_birthday})
       })
       .then(res => res.json())
       .then(result => {
         if(result.success) {
-          document.getElementById("result").innerHTML =
-            '<div class="alert alert-success">憑證發行成功！</div>' +
-            '<div><strong>Transaction ID：</strong>' + result.transactionId + '</div>' +
-            (result.qrCode ?
-              '<div class="mt-3"><img src="data:image/png;base64,' + result.qrCode + '" alt="QRCode"></div>' : ''
-            );
+          let html = '<div class="alert alert-success">憑證發行成功！</div>';
+          if (result.qrCode) {
+            html += '<div class="mt-3"><img src="data:image/png;base64,' + result.qrCode + '" alt="QRCode"></div>';
+          }
+          document.getElementById("result").innerHTML = html;
         } else {
           document.getElementById("result").innerHTML =
             '<div class="alert alert-danger">憑證發行失敗：' + (result.error || '未知錯誤') + '</div>';
         }
+      })
+      .catch(() => {
+        document.getElementById("result").innerHTML =
+          '<div class="alert alert-danger">伺服器未回應，請重新檢查後端連線或API設定。</div>';
       });
     });
   </script>
