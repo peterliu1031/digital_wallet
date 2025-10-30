@@ -32,8 +32,13 @@
         if(result.success) {
           let html = '<div class="alert alert-success">憑證發行成功！</div>';
           if (result.qrCode) {
-            html += '<div class="mt-3"><img src="data:image/png;base64,' + result.qrCode + '" alt="QRCode"></div>';
+            // 自動判斷來源字串是否已含 data:image/png;base64, 前綴
+            let src = result.qrCode.startsWith("data:image/png;base64,")
+              ? result.qrCode
+              : "data:image/png;base64," + result.qrCode;
+            html += '<div class="mt-3"><img src="' + src + '" alt="QRCode"></div>';
           }
+
           document.getElementById("result").innerHTML = html;
         } else {
           document.getElementById("result").innerHTML =
