@@ -20,9 +20,9 @@ EXPIRED_DATE = os.getenv("EXPIRED_DATE")
 def generate_vc():
     try:
         data = request.get_json()
-        studentId = data.get('studentId')
+        studentId = data.get('student')
         name = data.get('name')
-        className = data.get('className')
+        className = data.get('class')
         grade = data.get('grade')
 
         if not (studentId and name and className and grade):
