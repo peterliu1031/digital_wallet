@@ -49,7 +49,7 @@ def generate_vc():
         api_url = API_BASE_URL                         # ← 不要多加 /api/setVCItemData
         response = requests.post(api_url, headers=headers, json=schema)
 
-        if response.status_code != 200:
+        if not str(response.status_code).startswith("2"):
             return jsonify({'error': f'API 錯誤: {response.status_code}, {response.text}'}), 500
 
         result = response.json()
