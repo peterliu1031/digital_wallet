@@ -11,7 +11,10 @@ app = Flask(__name__)
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 
 # API base URL
-API_BASE_URL = "https://issuer-sandbox.wallet.gov.tw/api/qrcode/data"
+API_BASE_URL = os.getenv("API_BASE_URL")
+
+ISSUANCE_DATE = os.getenv("ISSUANCE_DATE")
+EXPIRED_DATE = os.getenv("EXPIRED_DATE")
 
 @app.route('/api/generate-vc', methods=['POST'])
 def generate_vc():
@@ -25,8 +28,8 @@ def generate_vc():
         # Schema
         schema = {
             "vcUid": "00000000_testest123",  # 根據你的專案實際填
-            "issuanceDate": "20251013",      # 根據你需求帶入
-            "expiredDate": "20261013",       # 根據你需求帶入
+            "issuanceDate": ISSUANCE_DATE,
+            "expiredDate": EXPIRED_DATE,
             "fields": [
                 {
                     "ename": "roc_birthday",
@@ -37,7 +40,7 @@ def generate_vc():
 
         # 呼叫API
         headers = {
-            'Access-Token': ACCESS_TOKEN,               # ← 必須用 Access-Token
+            'Access-Token': ACCESS_TOKEN,
             'Content-Type': 'application/json',
             'accept': 'application/json'
         }
