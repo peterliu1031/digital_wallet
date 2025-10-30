@@ -33,10 +33,9 @@ def generate_vc():
             "issuanceDate": ISSUANCE_DATE,
             "expiredDate": EXPIRED_DATE,
             "fields": [
-                {"ename": "studentId", "content": studentId},
+                {"ename": "student", "content": studentId},
                 {"ename": "name", "content": name},
-                {"ename": "className", "content": className},
-                {"ename": "grade", "content": grade},
+                {"ename": "class", "content": className},
             ]
         }
 
