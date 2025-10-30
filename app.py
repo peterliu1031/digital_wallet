@@ -9,12 +9,10 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-# AccessToken (記得 .env 內要正確設 ACCESS_TOKEN)
+# .env 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
-
-# API base URL
 API_BASE_URL = os.getenv("API_BASE_URL")
-
+VC_UID = os.getenv("VC_UID")
 ISSUANCE_DATE = os.getenv("ISSUANCE_DATE")
 EXPIRED_DATE = os.getenv("EXPIRED_DATE")
 
@@ -22,21 +20,23 @@ EXPIRED_DATE = os.getenv("EXPIRED_DATE")
 def generate_vc():
     try:
         data = request.get_json()
-        content = data.get('content')
+        studentId = data.get('studentId')
+        name = data.get('name')
+        className = data.get('className')
+        grade = data.get('grade')
 
-        if not content:
-            return jsonify({'error': 'content 不可為空'}), 400
+        if not (studentId and name and className and grade):
+            return jsonify({'error': '所有欄位皆為必填'}), 400
 
-        # Schema
         schema = {
-            "vcUid": "00000000_testest123",  # 根據你的專案實際填
+            "vcUid": VC_UID,  
             "issuanceDate": ISSUANCE_DATE,
             "expiredDate": EXPIRED_DATE,
             "fields": [
-                {
-                    "ename": "roc_birthday",
-                    "content": content
-                }
+                {"ename": "studentId", "content": studentId},
+                {"ename": "name", "content": name},
+                {"ename": "className", "content": className},
+                {"ename": "grade", "content": grade},
             ]
         }
 
@@ -46,15 +46,13 @@ def generate_vc():
             'Content-Type': 'application/json',
             'accept': 'application/json'
         }
-        api_url = API_BASE_URL                         # ← 不要多加 /api/setVCItemData
+        api_url = API_BASE_URL
         response = requests.post(api_url, headers=headers, json=schema)
 
         if not str(response.status_code).startswith("2"):
             return jsonify({'error': f'API 錯誤: {response.status_code}, {response.text}'}), 500
 
         result = response.json()
-
-        # 保存 transactionId
         transaction_id = result.get('transactionId')
         print(f"Transaction ID (保存用): {transaction_id}")
 
