@@ -36,9 +36,9 @@
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          student: studentId,   // 必須 student
+          student: studentId, 
           name: name,
-          class: className      // 必須 class
+          class: className
         })
       })
       .then(res => res.json())

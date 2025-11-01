@@ -1,4 +1,4 @@
-from flask import send_from_directory, Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import requests
 import json
 import os
@@ -21,10 +21,6 @@ def generate_vc():
         name = data.get('name')
         class_name = data.get('class')
 
-        # DEBUG
-        print("DEBUG:", student, name, class_name)
-        print("ENV:", VC_UID, ISSUANCE_DATE, EXPIRED_DATE)
-
         if not (student and name and class_name):
             return jsonify({'error': '所有欄位皆為必填'}), 400
 
@@ -39,23 +35,19 @@ def generate_vc():
             ]
         }
 
-        print("送出 schema:", json.dumps(schema, ensure_ascii=False))
-
         headers = {
             'Access-Token': ACCESS_TOKEN,
             'Content-Type': 'application/json',
             'accept': 'application/json'
         }
-        api_url = API_BASE_URL
-        response = requests.post(api_url, headers=headers, json=schema)
+        # 沙盒API路徑為 https://issuer-sandbox.wallet.gov.tw/api/qrcode/data
+        response = requests.post(API_BASE_URL, headers=headers, json=schema)
 
         if not str(response.status_code).startswith("2"):
             return jsonify({'error': f'API 錯誤: {response.status_code}, {response.text}'}), 500
 
         result = response.json()
         transaction_id = result.get('transactionId')
-        print(f"Transaction ID (保存用): {transaction_id}")
-
         return jsonify({
             'success': True,
             'transactionId': transaction_id,
