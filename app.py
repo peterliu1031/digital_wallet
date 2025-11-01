@@ -1,6 +1,4 @@
-from flask import send_from_directory
-
-from flask import Flask, request, jsonify
+from flask import send_from_directory, Flask, request, jsonify
 import requests
 import json
 import os
@@ -9,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-# .env 
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 API_BASE_URL = os.getenv("API_BASE_URL")
 VC_UID = os.getenv("VC_UID")
@@ -24,6 +21,10 @@ def generate_vc():
         name = data.get('name')
         class_name = data.get('class')
 
+        # DEBUG
+        print("DEBUG:", student, name, class_name)
+        print("ENV:", VC_UID, ISSUANCE_DATE, EXPIRED_DATE)
+
         if not (student and name and class_name):
             return jsonify({'error': '所有欄位皆為必填'}), 400
 
@@ -37,6 +38,8 @@ def generate_vc():
                 {"ename": "class", "content": class_name}
             ]
         }
+
+        print("送出 schema:", json.dumps(schema, ensure_ascii=False))
 
         headers = {
             'Access-Token': ACCESS_TOKEN,
@@ -61,7 +64,6 @@ def generate_vc():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/', methods=['GET'])
 def serve_index():

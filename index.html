@@ -28,7 +28,6 @@
   <script>
     document.getElementById("vcForm").addEventListener("submit", function(event) {
       event.preventDefault();
-      // 前端正則驗證已隱含，有需要可加自定義驗證
       const studentId = document.getElementById("studentId").value;
       const name = document.getElementById("name").value;
       const className = document.getElementById("className").value;
@@ -37,9 +36,9 @@
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          student: studentId,   
+          student: studentId,   // 必須 student
           name: name,
-          class: className  
+          class: className      // 必須 class
         })
       })
       .then(res => res.json())
