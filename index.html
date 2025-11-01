@@ -21,16 +21,6 @@
         <label for="className" class="form-label">班級 <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="className" required pattern="^[\u4e00-\u9fa5]+$" title="僅允許中文">
       </div>
-      <div class="mb-3">
-        <label for="grade" class="form-label">年級 <span class="text-danger">*</span></label>
-        <select class="form-select" id="grade" required>
-          <option value="">請選擇年級</option>
-          <option value="1">1年級</option>
-          <option value="2">2年級</option>
-          <option value="3">3年級</option>
-          <option value="4">4年級</option>
-        </select>
-      </div>
       <button type="submit" class="btn btn-primary w-100">送出產生 QRCode</button>
     </form>
     <div id="result" class="mt-4"></div>
