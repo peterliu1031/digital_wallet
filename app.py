@@ -34,7 +34,7 @@ def generate_vc():
             "fields": [
                 {"ename": "student", "content": student},
                 {"ename": "name", "content": name},
-                {"ename": "class", "content": class_name},
+                {"ename": "class", "content": class_name}
             ]
         }
 
