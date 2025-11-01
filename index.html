@@ -1,55 +1,116 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <title>學生證發行表單</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>校園請假憑證</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0f7fa 0%, #fffefc 100%);
+    }
+    .vc-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 2px 24px 0 #b8d2df44;
+      padding: 28px 28px 18px 28px;
+      margin-top: 45px;
+    }
+    .vc-header {
+      color: #226b9a;
+      font-weight: 700;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      text-align: center;
+      letter-spacing: 3px;
+    }
+    .qrcode-area {
+      text-align: center;
+      margin: 24px 0 12px 0;
+    }
+    .vc-meta {
+      font-family: 'Noto Sans TC', sans-serif;
+      color: #357;
+      background: #e3f2fd;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    .btn-primary {
+      background: #2a6bbc;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-    <h2>學生卡發行（student、name、class）</h2>
-    <form id="studentForm">
-        <label for="student">學號 *</label>
-        <input type="text" id="student" name="student" required><br>
-        <label for="name">姓名 *</label>
-        <input type="text" id="name" name="name" required><br>
-        <label for="class">班級 *</label>
-        <input type="text" id="class" name="class" required><br>
-        <button type="submit">發行</button>
-    </form>
-    <div id="result"></div>
-    <script>
-        document.getElementById('studentForm').onsubmit = async function(e){
-            e.preventDefault();
-            const student = document.getElementById('student').value.trim();
-            const name = document.getElementById('name').value.trim();
-            const className = document.getElementById('class').value.trim();
-            const result = document.getElementById('result');
-            result.innerHTML = '送出中...';
+  <div class="container" style="max-width:415px;">
+    <div class="vc-card shadow">
+      <div class="vc-header">
+        校園請假憑證
+        <div style="font-size: small; color: #666; font-weight: 400;letter-spacing:0px;">Campus Leave Certificate</div>
+      </div>
+      <form id="vcForm">
+        <div class="mb-3">
+          <label for="studentId" class="form-label">學號 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="studentId" required pattern="^[A-Za-z0-9]+$" title="僅允許英數字">
+        </div>
+        <div class="mb-3">
+          <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="name" required pattern="^[\u4e00-\u9fa5A-Za-z0-9_]+$" title="僅允許中英文、數字與底線">
+        </div>
+        <div class="mb-3">
+          <label for="className" class="form-label">班級 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="className" required pattern="^[\u4e00-\u9fa5]+$" title="僅允許中文">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">送出產生憑證 QRCode</button>
+      </form>
+      <div id="result" class="mt-4"></div>
+    </div>
+  </div>
+  <script>
+    document.getElementById("vcForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const studentId = document.getElementById("studentId").value;
+      const name = document.getElementById("name").value;
+      const className = document.getElementById("className").value;
 
-            try {
-                const res = await fetch('/api/generate-vc', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ fields: [
-                        {"ename": "student", "content": student },
-                        {"ename": "name",    "content": name    },
-                        {"ename": "class",   "content": className}
-                    ]})
-                });
-                const data = await res.json();
-                if (data.success) {
-                    result.innerHTML =
-                        `<div>發行成功！</div>
-                         <div><b>Transaction ID:</b> ${data.transactionId}</div>
-                         <div><img src="${data.qrCode}" alt="QRCode" width="300"></div>
-                         <div><a href="${data.deepLink}">憑證 deepLink</a></div>`;
-                } else {
-                    result.innerHTML = `憑證發行失敗：${data.error || '未知錯誤'}`;
-                }
-            } catch(err){
-                result.innerHTML = `發行過程異常：${err}`;
-            }
+      fetch("/api/generate-vc", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          student: studentId, 
+          name: name,
+          class: className
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        if(result.success) {
+          let html = `
+            <div class="alert alert-success text-center mb-3">憑證發行成功！</div>
+            <div class="qrcode-area">
+              <img alt="QRCode" src="${
+                result.qrCode.startsWith("data:image/png;base64,") ? result.qrCode : "data:image/png;base64," + result.qrCode
+              }" class="img-fluid" style="max-width:220px;max-height:220px;border-radius:9px;box-shadow:0 2px 12px #BBD7E7;">
+            </div>
+            <div class="vc-meta">
+              <div>學號：<b>${studentId}</b></div>
+              <div>姓名：<b>${name}</b></div>
+              <div>班級：<b>${className}</b></div>
+            </div>
+          `;
+          document.getElementById("result").innerHTML = html;
+        } else {
+          document.getElementById("result").innerHTML =
+            '<div class="alert alert-danger text-center">憑證發行失敗：' + (result.error || '未知錯誤') + '</div>';
         }
-    </script>
+      })
+      .catch(() => {
+        document.getElementById("result").innerHTML =
+          '<div class="alert alert-danger text-center">伺服器未回應，請檢查後端。</div>';
+      });
+    });
+  </script>
 </body>
 </html>
