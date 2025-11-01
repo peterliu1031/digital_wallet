@@ -25,6 +25,7 @@ def generate_vc():
         fields = data.get('fields')
         print("fields =", fields)
 
+        print('DEBUG環境:', ACCESS_TOKEN, API_BASE_URL, VC_UID, ISSUANCE_DATE, EXPIRED_DATE)  # <--- 加這行
         # 檢查必填欄位
         if not fields or not isinstance(fields, list) or not all('ename' in f and 'content' in f for f in fields):
             return jsonify({'error': 'fields 格式不正確，必須帶 ename, content'}), 400
@@ -42,6 +43,7 @@ def generate_vc():
         }
         print("API url:", API_BASE_URL)
         print("schema:", schema)
+        print("headers:", headers)  # <--- 加這行
         response = requests.post(API_BASE_URL, headers=headers, json=schema)
         print("status:", response.status_code, "text:", response.text)
 
@@ -61,3 +63,4 @@ def generate_vc():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
