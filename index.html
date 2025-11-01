@@ -2,21 +2,27 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>短期通行憑證發行表單</title>
+    <title>學生證發行表單</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h2>發行憑證（僅出生年月日）</h2>
-    <form id="walletForm">
-        <label for="birthday">民國出生年月日 *</label>
-        <input type="text" id="birthday" name="birthday" required placeholder="格式：0900101">
+    <h2>學生卡發行（student、name、class）</h2>
+    <form id="studentForm">
+        <label for="student">學號 *</label>
+        <input type="text" id="student" name="student" required><br>
+        <label for="name">姓名 *</label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="class">班級 *</label>
+        <input type="text" id="class" name="class" required><br>
         <button type="submit">發行</button>
     </form>
     <div id="result"></div>
     <script>
-        document.getElementById('walletForm').onsubmit = async function(e){
+        document.getElementById('studentForm').onsubmit = async function(e){
             e.preventDefault();
-            const content = document.getElementById('birthday').value.trim();
+            const student = document.getElementById('student').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const className = document.getElementById('class').value.trim();
             const result = document.getElementById('result');
             result.innerHTML = '送出中...';
 
@@ -24,11 +30,15 @@
                 const res = await fetch('/api/generate-vc', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ content })
+                    body: JSON.stringify({ fields: [
+                        {"ename": "student", "content": student },
+                        {"ename": "name",    "content": name    },
+                        {"ename": "class",   "content": className}
+                    ]})
                 });
                 const data = await res.json();
                 if (data.success) {
-                    result.innerHTML = 
+                    result.innerHTML =
                         `<div>發行成功！</div>
                          <div><b>Transaction ID:</b> ${data.transactionId}</div>
                          <div><img src="${data.qrCode}" alt="QRCode" width="300"></div>
