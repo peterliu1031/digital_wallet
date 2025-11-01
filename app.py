@@ -25,21 +25,22 @@ def generate_vc():
             return jsonify({'error': '所有欄位皆為必填'}), 400
 
         schema = {
-            "vcUid": VC_UID,
-            "issuanceDate": ISSUANCE_DATE,
-            "expiredDate": EXPIRED_DATE,
-            "fields": [
-                {"ename": "student", "content": student},
-                {"ename": "name", "content": name},
-                {"ename": "class", "content": class_name}
-            ]
-        }
+    "vcUid": VC_UID,
+    "issuanceDate": ISSUANCE_DATE,
+    "expiredDate": EXPIRED_DATE,
+    "fields": [
+        {"ename": "student", "content": student},
+        {"ename": "name", "content": name},
+        {"ename": "class", "content": class_name}
+    ]
+}
+
 
         headers = {
-            'Access-Token': ACCESS_TOKEN,
-            'Content-Type': 'application/json',
-            'accept': 'application/json'
-        }
+    'Access-Token': ACCESS_TOKEN,
+    'Content-Type': 'application/json',
+    'accept': 'application/json'
+}
         # 沙盒API路徑為 https://issuer-sandbox.wallet.gov.tw/api/qrcode/data
         response = requests.post(API_BASE_URL, headers=headers, json=schema)
 
