@@ -69,6 +69,9 @@
     </div>
   </div>
   <script>
+    let pollingInterval = null;
+    let currentTransactionId = null;
+
     document.getElementById("vcForm").addEventListener("submit", function(event) {
       event.preventDefault();
       const studentId = document.getElementById("studentId").value;
@@ -99,8 +102,19 @@
               <div>姓名：<b>${name}</b></div>
               <div>班級：<b>${className}</b></div>
             </div>
+            <div id="polling-status" class="mt-3 text-secondary text-center" style="font-size:1rem;">等待學生掃描領取憑證...</div>
           `;
           document.getElementById("result").innerHTML = html;
+          // 保存 transactionId，開始 polling
+          if(result.deepLink && result.deepLink.includes("transactionId=")){
+            // deepLink 通常型態為 ...?transactionId=XXXX
+            currentTransactionId = result.deepLink.split("transactionId=")[1];
+          } else if(result.transactionId) {
+            currentTransactionId = result.transactionId;
+          } else {
+            currentTransactionId = null;
+          }
+          startPolling();
         } else {
           document.getElementById("result").innerHTML =
             '<div class="alert alert-danger text-center">憑證發行失敗：' + (result.error || '未知錯誤') + '</div>';
@@ -111,6 +125,32 @@
           '<div class="alert alert-danger text-center">伺服器未回應，請檢查後端。</div>';
       });
     });
+
+    function startPolling() {
+      // 若已有輪詢則先清除
+      if(pollingInterval) clearInterval(pollingInterval);
+      if(!currentTransactionId) return;
+      pollingInterval = setInterval(() => {
+        fetch(`/api/poll-transaction?transactionId=${currentTransactionId}`)
+          .then(res => res.json())
+          .then(data => {
+            if(data.status === 'completed' || data.status === 'issued') {
+              document.getElementById("result").innerHTML = `
+                <div class="alert alert-success text-center">憑證已成功發送，學生已領取！</div>
+              `;
+              clearInterval(pollingInterval);
+            }
+            // 若失敗或過期，可加判斷
+            else if(data.status === 'expired' || data.status === 'invalid') {
+              document.getElementById("result").innerHTML = `
+                <div class="alert alert-danger text-center">憑證已失效或撤銷。</div>
+              `;
+              clearInterval(pollingInterval);
+            }
+          })
+          .catch(()=>{});
+      }, 3500); // 每隔 3.5 秒
+    }
   </script>
 </body>
 </html>

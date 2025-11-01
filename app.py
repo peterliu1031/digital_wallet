@@ -14,9 +14,27 @@ VC_UID        = os.getenv("VC_UID")
 ISSUANCE_DATE = os.getenv("ISSUANCE_DATE")
 EXPIRED_DATE  = os.getenv("EXPIRED_DATE")
 
-@app.route('/', methods=['GET'])
-def serve_index():
-    return send_from_directory('.', 'index.html')
+@app.route('/api/poll-transaction', methods=['GET'])
+def poll_transaction():
+    transaction_id = request.args.get('transactionId')
+    if not transaction_id:
+        return jsonify({'error': '缺少 transactionId'}), 400
+    url = f"{API_BASE_URL}/api/v1/transaction/{transaction_id}"  # 須確認API的路徑設定
+    headers = {
+        'Access-Token': ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+        'accept': 'application/json'
+    }
+    try:
+        resp = requests.get(url, headers=headers)
+        result = resp.json()
+        # 這邊依據API實際回傳內容決定狀態映射
+        return jsonify({
+            'status': result.get('status', ''),  # 例如 'completed', 'issued', 'expired', 'invalid' 等
+            'detail': result
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/generate-vc', methods=['POST'])
 def generate_vc():
