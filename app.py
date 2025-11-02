@@ -3,6 +3,8 @@ from flask_cors import CORS
 import requests
 import os
 from dotenv import load_dotenv
+import base64
+import json
 
 load_dotenv()
 app = Flask(__name__)
@@ -13,9 +15,19 @@ API_BASE_URL  = os.getenv("API_BASE_URL")  # https://issuer-sandbox.wallet.gov.t
 VC_UID        = os.getenv("VC_UID")
 ISSUANCE_DATE = os.getenv("ISSUANCE_DATE")
 EXPIRED_DATE  = os.getenv("EXPIRED_DATE")
-
-# 正確查詢憑證資料 endpoint
 CREDENTIAL_QUERY_BASE = "https://issuer-sandbox.wallet.gov.tw/api/credential/nonce"
+
+def decode_jwt_payload(jwt_token):
+    try:
+        parts = jwt_token.split('.')
+        payload = parts[1]
+        padded_payload = payload + '=' * (-len(payload) % 4)
+        decoded_bytes = base64.urlsafe_b64decode(padded_payload.encode())
+        data = json.loads(decoded_bytes)
+        return data
+    except Exception as e:
+        print("JWT decode error:", e)
+        return {}
 
 @app.route('/api/generate-vc', methods=['POST'])
 def generate_vc():
@@ -74,17 +86,24 @@ def poll_transaction():
     }
     try:
         resp = requests.get(url, headers=headers)
-        try:
-            result = resp.json()
-        except Exception:
-            print("Polling API raw:", resp.text)
-            return jsonify({'error': 'API response not JSON', 'raw': resp.text}), 500
-
+        result = resp.json()
         print("Polling 回傳 detail:", result)
-        # 根據沙盒回傳 "isReceived":true 才代表已領取
-        received = result.get('isReceived', False)
+        credential = result.get('credential')
+        cid = None
+        received = False
+        status_info = {}
+        if credential:
+            payload = decode_jwt_payload(credential)
+            print("JWT Payload:", payload)
+            cid_url = payload.get('jti', '')
+            cid = cid_url.split('/')[-1] if cid_url else None
+            status_info = payload.get('credentialStatus', {})
+            if status_info.get("statusListIndex", "0") != "0":
+                received = True
         return jsonify({
             'received': received,
+            'cid': cid,
+            'status_info': status_info,
             'detail': result
         })
     except Exception as e:

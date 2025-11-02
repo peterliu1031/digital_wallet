@@ -105,7 +105,6 @@
             <div id="polling-status" class="mt-3 text-secondary text-center">等待學生掃描領取憑證...</div>
           `;
           document.getElementById("result").innerHTML = html;
-          // 取得 transactionId，開始 polling
           currentTransactionId = result.transactionId;
           startPolling();
         } else {
@@ -128,7 +127,7 @@
           .then(data => {
             if (data.received === true) {
               document.getElementById("result").innerHTML = `
-                <div class="alert alert-success text-center">憑證已成功發送，學生已領取！</div>
+                <div class="alert alert-success text-center">憑證已成功發送，學生已領取！ CID：${data.cid}</div>
               `;
               clearInterval(pollingInterval);
             }
