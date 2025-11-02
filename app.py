@@ -87,28 +87,31 @@ def poll_transaction():
     try:
         resp = requests.get(url, headers=headers)
         result = resp.json()
-        print("Polling 回傳 detail:", result)
         credential = result.get('credential')
-        cid = None
         received = False
-        status_info = {}
+        cid = None
+        # 只有 credential 有值才解析 payload
         if credential:
-            payload = decode_jwt_payload(credential)
-            print("JWT Payload:", payload)
-            cid_url = payload.get('jti', '')
-            cid = cid_url.split('/')[-1] if cid_url else None
-            status_info = payload.get('credentialStatus', {})
-            if status_info.get("statusListIndex", "0") != "0":
+            parts = credential.split('.')
+            payload = parts[1]
+            padded = payload + '=' * (-len(payload)%4)
+            decoded = json.loads(base64.urlsafe_b64decode(padded.encode()))
+            vc = decoded.get('vc', {})
+            status = vc.get('credentialStatus', {})
+            # 根據 statusListIndex 判斷領取
+            if status.get('statusListIndex', "0") != "0":
                 received = True
+            cid_url = decoded.get('jti', '')
+            cid = cid_url.split('/')[-1] if cid_url else None
         return jsonify({
             'received': received,
             'cid': cid,
-            'status_info': status_info,
             'detail': result
         })
     except Exception as e:
         print("Exception:", e)
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/', methods=['GET'])
 def serve_index():
