@@ -19,7 +19,7 @@ def poll_transaction():
     transaction_id = request.args.get('transactionId')
     if not transaction_id:
         return jsonify({'error': '缺少 transactionId'}), 400
-    url = f"{API_BASE_URL}/api/v1/transaction/{transaction_id}"  # 須確認API的路徑設定
+    url = f"https://issuer-sandbox.wallet.gov.tw/api/v1/transaction/{transaction_id}"
     headers = {
         'Access-Token': ACCESS_TOKEN,
         'Content-Type': 'application/json',
