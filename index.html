@@ -126,9 +126,12 @@
           .then(res => res.json())
           .then(data => {
             if (data.received === true) {
-              document.getElementById("result").innerHTML = `
-                <div class="alert alert-success text-center">憑證已成功發送，學生已領取！ CID：${data.cid}</div>
-              `;
+            document.getElementById("result").innerHTML = `
+              <div class="alert alert-success text-center">
+                憑證已成功發送，學生已領取！<br/>
+                CID：${data.cid}
+              </div>
+            `;
               clearInterval(pollingInterval);
             }
           })
