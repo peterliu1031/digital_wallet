@@ -1,5 +1,5 @@
 cd C:
-cd Users/1234/Desktop/新增資料夾/
+cd Users/1234/Desktop/issuer/
 git add .
 git commit -m "完成吧"
 git push
