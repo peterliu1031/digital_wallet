@@ -102,7 +102,7 @@
               <div>姓名：<b>${name}</b></div>
               <div>班級：<b>${className}</b></div>
             </div>
-            <div id="polling-status" class="mt-3 text-secondary text-center" style="font-size:1rem;">等待學生掃描領取憑證...</div>
+            <div id="polling-status" class="mt-3 text-secondary text-center">等待學生掃描領取憑證...</div>
           `;
           document.getElementById("result").innerHTML = html;
           // 取得 transactionId，開始 polling
@@ -126,15 +126,9 @@
         fetch(`/api/poll-transaction?transactionId=${currentTransactionId}`)
           .then(res => res.json())
           .then(data => {
-            if(data.status === 'completed' || data.status === 'issued') {
+            if (data.received === true) {
               document.getElementById("result").innerHTML = `
                 <div class="alert alert-success text-center">憑證已成功發送，學生已領取！</div>
-              `;
-              clearInterval(pollingInterval);
-            }
-            else if(data.status === 'expired' || data.status === 'invalid') {
-              document.getElementById("result").innerHTML = `
-                <div class="alert alert-danger text-center">憑證已失效或撤銷。</div>
               `;
               clearInterval(pollingInterval);
             }

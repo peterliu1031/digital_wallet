@@ -14,8 +14,8 @@ VC_UID        = os.getenv("VC_UID")
 ISSUANCE_DATE = os.getenv("ISSUANCE_DATE")
 EXPIRED_DATE  = os.getenv("EXPIRED_DATE")
 
-# 發行端查詢 Transaction 狀態 endpoint
-TRANSACTION_API_BASE = "https://issuer-sandbox.wallet.gov.tw/issuer/api/v1/transaction"
+# 正確查詢憑證資料 endpoint
+CREDENTIAL_QUERY_BASE = "https://issuer-sandbox.wallet.gov.tw/api/credential/nonce"
 
 @app.route('/api/generate-vc', methods=['POST'])
 def generate_vc():
@@ -56,7 +56,7 @@ def generate_vc():
             'success': True,
             'qrCode': result.get('qrCode'),
             'deepLink': result.get('deepLink'),
-            'transactionId': transaction_id  # 前端需要用這個去輪詢
+            'transactionId': transaction_id
         })
     except Exception as e:
         print("Exception:", e)
@@ -67,7 +67,7 @@ def poll_transaction():
     transaction_id = request.args.get('transactionId')
     if not transaction_id:
         return jsonify({'error': '缺少 transactionId'}), 400
-    url = f"{TRANSACTION_API_BASE}/{transaction_id}"
+    url = f"{CREDENTIAL_QUERY_BASE}/{transaction_id}"
     headers = {
         'Access-Token': ACCESS_TOKEN,
         'accept': 'application/json'
@@ -77,12 +77,14 @@ def poll_transaction():
         try:
             result = resp.json()
         except Exception:
-            print("Polling API raw:", resp.text)  # debug原始字串
+            print("Polling API raw:", resp.text)
             return jsonify({'error': 'API response not JSON', 'raw': resp.text}), 500
 
-        print("Polling 回傳 detail:", result)  # 最關鍵debug點
+        print("Polling 回傳 detail:", result)
+        # 根據沙盒回傳 "isReceived":true 才代表已領取
+        received = result.get('isReceived', False)
         return jsonify({
-            'status': result.get('status', ''),  # 你根據這裡status來調前端判斷
+            'received': received,
             'detail': result
         })
     except Exception as e:
