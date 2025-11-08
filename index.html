@@ -2,7 +2,7 @@
 <html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
-    <title>校園請假憑證發行端 – UI全修正</title>
+    <title>校園請假憑證發行端 - RWD全功能Demo</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link
       rel="stylesheet"
@@ -18,17 +18,11 @@
     />
     <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
     <style>
-      html,
-      body {
-        height: 100%;
-        min-height: 100%;
-      }
       body {
         background: linear-gradient(120deg, #e7f0fe 0%, #fffbe6 100%);
         font-family: "Noto Sans TC", sans-serif;
-        transition: background 0.5s;
+        transition: 0.4s;
       }
-      .theme-dark body,
       body.theme-dark {
         background: linear-gradient(
           120deg,
@@ -39,21 +33,26 @@
       }
       .vc-card {
         background: #fff;
-        border-radius: 1.5vw;
-        box-shadow: 0 0.26vw 2vw 0 #b8d2df44;
+        border-radius: 1.5rem;
+        box-shadow: 0 0.8rem 2.2rem 0 #b8d2df44;
         max-width: 98vw;
-        width: 45vw;
-        margin: clamp(1vw, 7vw, 5vw) auto 2.5vw auto;
-        padding: clamp(1vw, 6vw, 2.5vw);
-        min-height: 40vw;
+        width: 440px;
+        margin: clamp(10px, 7vw, 54px) auto 38px auto;
+        padding: clamp(13px, 6vw, 38px);
+        min-height: 450px;
         position: relative;
         z-index: 3;
-        transition: background 0.4s, color 0.4s;
+        transition: 0.4s;
       }
-      .theme-dark .vc-card,
       body.theme-dark .vc-card {
         background: #22282c;
         color: #fde99c;
+      }
+      .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.5em;
       }
       .header-main {
         font-size: 2.15rem;
@@ -61,48 +60,72 @@
         color: #226b9a;
         text-align: center;
         letter-spacing: 3px;
-        margin-bottom: 2px;
-        transition: 0.5s;
+        transition: 0.4s;
+        flex: 1;
       }
-      .theme-dark .header-main,
       body.theme-dark .header-main {
         color: #ffd600;
       }
       .header-sub {
-        font-size: 0.95rem;
+        font-size: 0.96rem;
         color: #888;
         text-align: center;
-        margin-bottom: 15px;
+        margin-bottom: 16px;
       }
-      .theme-dark .header-sub,
       body.theme-dark .header-sub {
         color: #ffe082;
       }
-
-      /* ---- 修正tab-nav讓文字不換行且用比例寬度 ---- */
+      .theme-switch {
+        min-width: 62px;
+      }
+      .theme-switch input {
+        display: none;
+      }
+      .theme-switch label {
+        cursor: pointer;
+        padding: 6px 14px;
+        border-radius: 13px;
+        color: #226b9a;
+        background: #e7f4ff;
+        border: 1.5px solid #a7daf6;
+        font-weight: 700;
+        user-select: none;
+        transition: 0.2s;
+        font-size: 0.97rem;
+        min-width: 50px;
+      }
+      body.theme-dark .theme-switch label {
+        background: #2f394d;
+        color: #ffe082;
+        border-color: #ffe082;
+      }
       .tab-nav {
         display: flex;
-        justify-content: center;
-        margin-bottom: 1vw;
-        gap: 2vw;
-        font-size: 1.07rem;
-        flex-wrap: nowrap;
+        justify-content: flex-start;
         overflow-x: auto;
+        gap: 10px;
+        font-size: 1.07rem;
+        margin-bottom: 9px;
+        flex-wrap: nowrap;
+        border-bottom: 1.5px solid #eef;
+      }
+      .tab-nav::-webkit-scrollbar {
+        display: none;
       }
       .tab-btn {
         background: none;
         border: none;
         color: #777;
-        padding: 0.6vw 2vw;
-        border-radius: 0.9vw;
+        padding: 0.57em 1.1em;
+        border-radius: 8px;
         font-weight: 600;
         letter-spacing: 1px;
         white-space: nowrap;
-        width: 21vw;
-        max-width: 140px;
-        min-width: 90px;
         text-align: center;
+        min-width: 88px;
+        max-width: 160px;
         transition: 0.3s;
+        font-size: 1rem;
       }
       .tab-btn.active,
       .tab-btn:focus {
@@ -111,38 +134,9 @@
         border: 1.5px solid #ffc107;
         box-shadow: 0 2px 8px #ffe9b3;
       }
-      .theme-dark .tab-btn.active,
       body.theme-dark .tab-btn.active,
-      .theme-dark .tab-btn:focus,
       body.theme-dark .tab-btn:focus {
         background: #2d3244;
-        color: #ffe082;
-        border-color: #ffe082;
-      }
-
-      .theme-switch {
-        position: absolute;
-        top: 1.5vw;
-        right: 1.5vw;
-        z-index: 24;
-      }
-      .theme-switch input {
-        display: none;
-      }
-      .theme-switch label {
-        cursor: pointer;
-        padding: 0.5vw 1.3vw;
-        border-radius: 1vw;
-        color: #226b9a;
-        background: #e7f4ff;
-        border: 1.5px solid #a7daf6;
-        font-weight: 700;
-        transition: background 0.2s;
-        user-select: none;
-      }
-      .theme-dark .theme-switch label,
-      body.theme-dark .theme-switch label {
-        background: #2f394d;
         color: #ffe082;
         border-color: #ffe082;
       }
@@ -150,23 +144,22 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 12px;
-        gap: 1vw;
+        margin-bottom: 9px;
+        gap: 14px;
       }
       .stepper-step {
-        width: 2vw;
-        height: 2vw;
-        min-width: 2vw;
+        width: 27px;
+        height: 27px;
         border-radius: 50%;
         background: #e0edf8;
         color: #226b9a;
         font-weight: 700;
-        font-size: 1.06rem;
-        border: 2px solid #e0edf8;
-        transition: 0.3s;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 1.13rem;
+        border: 2px solid #e0edf8;
+        transition: 0.2s;
       }
       .stepper-step.active {
         background: #fff;
@@ -174,35 +167,32 @@
         color: #b07913;
         box-shadow: 0 2px 7px #ffe9b3;
       }
-      .theme-dark .stepper-step,
       body.theme-dark .stepper-step {
         background: #35373b;
         color: #ffe082;
         border-color: #34343b;
       }
-      .theme-dark .stepper-step.active,
       body.theme-dark .stepper-step.active {
         background: #22292e;
         border-color: #ffe082;
         color: #ffe082;
       }
       .stepper-line {
-        font-size: 1.23rem;
+        font-size: 1.1rem;
         color: #b8d2df;
         margin: 0 4px;
       }
-      .theme-dark .stepper-line,
       body.theme-dark .stepper-line {
         color: #38373d;
       }
       .qrcode-area img {
-        width: clamp(10vw, 40vw, 20vw);
-        max-width: 22vw;
+        width: clamp(120px, 40vw, 220px);
+        max-width: 220px;
         box-shadow: 0 2px 18px #bbd7e7;
         border-radius: 1vw;
         background: #f1f8fe;
-        border: 0.5vw solid #fffde7;
-        margin: 0.5vw 0;
+        border: 5px solid #fffde7;
+        margin: 6px 0;
         transition: 0.3s;
         animation: popQ 0.73s cubic-bezier(0.23, 1.25, 0.48, 0.82);
       }
@@ -216,123 +206,128 @@
           opacity: 1;
         }
       }
-      .theme-dark .qrcode-area img,
       body.theme-dark .qrcode-area img {
         background: #3d4146;
         border-color: #444;
       }
       .scan-hint {
-        font-size: 1.1rem;
+        font-size: 1.08rem;
         color: #ff9800;
         text-align: center;
-        margin-bottom: 6px;
+        margin-bottom: 9px;
         font-weight: 600;
       }
       .vc-meta {
         background: #e7f4ff;
-        border-radius: 1vw;
-        padding: 1vw 1vw;
+        border-radius: 12px;
+        padding: 13px;
         color: #356;
         font-size: 1rem;
         margin-bottom: 8px;
         line-height: 1.63;
-        border-left: 0.4vw solid #ffc107;
+        border-left: 4px solid #ffc107;
         text-align: center;
         word-break: break-all;
-        transition: 0.5s;
       }
-      .theme-dark .vc-meta,
       body.theme-dark .vc-meta {
         background: #28292a;
         color: #ffe082;
-        border-left: 0.4vw solid #ffd600;
+        border-left: 4px solid #ffd600;
       }
       .cid-highlight {
-        font-size: 1.17rem;
+        font-size: 1.13rem;
         font-weight: 700;
         color: #aa7c1b;
         letter-spacing: 1px;
         background: linear-gradient(90deg, #fff3cd 10%, #fffde7 90%);
-        border-radius: 0.9vw;
-        padding: 0.7vw 1.2vw;
+        border-radius: 10px;
+        padding: 7px 12px;
         display: inline-block;
-        margin: 0.4vw 0 1vw 0;
-        transition: 0.5s;
-        box-shadow: 0 0.3vw 2vw #ffe08222;
+        margin: 4px 0 10px 0;
+        transition: 0.3s;
+        box-shadow: 0 3px 22px #ffe08222;
       }
-      .theme-dark .cid-highlight,
       body.theme-dark .cid-highlight {
         background: linear-gradient(90deg, #463e13 10%, #665400 90%);
         color: #ffc107;
       }
-      .fade-in {
-        animation: fadeIn 0.7s;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(13px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      /* FAQ 彈窗-比例與暗色 */
       .faq-pop {
         background: #fffbe8;
-        border-radius: 1vw;
-        box-shadow: 0 2px 1.6vw #fce6aa99;
-        padding: 1.2vw 1.2vw;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px #fce6aa99;
+        padding: 18px 16px;
         position: fixed;
-        top: 12vh;
+        top: 14vh;
         left: 50%;
         transform: translateX(-50%);
-        min-width: 15vw;
+        min-width: 220px;
         max-width: 95vw;
-        font-size: 0.98rem;
+        font-size: 1rem;
         z-index: 99;
-        border: 0.16vw solid #ffe082;
+        border: 2px solid #ffe082;
         color: #666;
         display: none;
       }
       .faq-pop.active {
         display: block;
       }
-      .faq-btn {
-        background: none;
-        border: none;
-        font-size: 1.35rem;
-        color: #ffc107;
-        z-index: 100;
-        position: absolute;
-        top: 1.8vw;
-        left: 0.8vw;
-      }
-
-      /* 暗色的FAQ彈窗修正 */
-      .theme-dark .faq-pop,
       body.theme-dark .faq-pop {
         background: #2d3244;
         color: #ffd600;
         border-color: #ffd600;
       }
+      .faq-btn {
+        background: none;
+        border: none;
+        font-size: 1.33rem;
+        color: #ffc107;
+        z-index: 100;
+        position: absolute;
+        top: 13px;
+        left: 8px;
+      }
+      @media (max-width: 600px) {
+        .vc-card {
+          width: 99vw;
+          min-height: unset;
+          padding: 14px 7vw 15px 7vw;
+        }
+        .header-main {
+          font-size: 1.22rem;
+        }
+        .tab-btn {
+          min-width: 68px;
+          max-width: 109px;
+          padding: 7px 10px;
+          font-size: 0.97em;
+        }
+        .stepper {
+          gap: 7px;
+        }
+        .cid-highlight {
+          font-size: 0.97rem;
+        }
+        .faq-btn {
+          top: 8px;
+          left: 8px;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="vc-card" id="VCApp">
-      <div class="theme-switch">
-        <input type="checkbox" id="themeToggler" />
-        <label for="themeToggler"
-          ><i class="fa-solid fa-circle-half-stroke me-1"></i> 暗色模式</label
-        >
+      <div class="header-row">
+        <div class="header-main">
+          <i class="fa-solid fa-house-laptop"></i> 校園請假憑證
+        </div>
+        <div class="theme-switch">
+          <input type="checkbox" id="themeToggler" />
+          <label for="themeToggler"
+            ><i class="fa-solid fa-circle-half-stroke me-1"></i>暗</label
+          >
+        </div>
       </div>
-      <div class="header-main">
-        <i class="fa-solid fa-house-laptop"></i>校園請假憑證
-      </div>
-      <div class="header-sub">
-        Campus Leave Certificate - 發行端(API+互動DEMO)
-      </div>
+      <div class="header-sub">Campus Leave Certificate - 發行端</div>
       <div class="tab-nav mb-2">
         <button class="tab-btn active" onclick="tabSwitch('issue')">
           <i class="fa-solid fa-certificate"></i>憑證發行
@@ -428,23 +423,22 @@
       function renderStep1() {
         setActiveStep(1);
         document.getElementById("step-content").innerHTML = `
-        <form id="vcForm" class="fade-in">
-          <div class="mb-3">
-            <label for="studentId" class="form-label">學號 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="studentId" required pattern="^[A-Za-z0-9]+$" title="僅允許英數字">
-          </div>
-          <div class="mb-3">
-            <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="name" required pattern="^[\\u4e00-\\u9fa5A-Za-z0-9_]+$" title="僅允許中英文、數字與底線">
-          </div>
-          <div class="mb-3">
-            <label for="className" class="form-label">班級 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="className" required pattern="^[\\u4e00-\\u9fa5]+$" title="僅允許中文">
-          </div>
-          <button type="submit" class="btn btn-primary w-100">送出產生憑證 QRCode</button>
-        </form>
-        <div id="form-alert" class="mt-2"></div>
-      `;
+      <form id="vcForm" class="fade-in">
+        <div class="mb-3">
+          <label for="studentId" class="form-label">學號 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="studentId" required pattern="^[A-Za-z0-9]+$" title="僅允許英數字">
+        </div>
+        <div class="mb-3">
+          <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="name" required pattern="^[\\u4e00-\\u9fa5A-Za-z0-9_]+$" title="僅允許中英文、數字與底線">
+        </div>
+        <div class="mb-3">
+          <label for="className" class="form-label">班級 <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="className" required pattern="^[\\u4e00-\\u9fa5]+$" title="僅允許中文">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">送出產生憑證 QRCode</button>
+      </form>
+      <div id="form-alert" class="mt-2"></div>`;
         document.getElementById("vcForm").onsubmit = function (event) {
           event.preventDefault();
           const studentId = document.getElementById("studentId").value.trim();
@@ -546,7 +540,7 @@
             .getElementById("cidCopyZone")
             .insertAdjacentHTML(
               "beforeend",
-              `<span style="color:#29b56a;font-size:.95rem;margin-left:8px;">已複製！</span>`
+              `<span style="color:#29b56a;font-size:.97rem;margin-left:8px;">已複製！</span>`
             );
           setTimeout(
             () =>
