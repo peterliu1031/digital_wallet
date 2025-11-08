@@ -431,6 +431,10 @@
       </div>
     </div>
     <script>
+      let lastStudentId = "";
+      let lastName = "";
+      let lastClassName = "";
+
       // 暗亮主題切換（icon視覺與文字）
       function applyThemeChange(isDark) {
         document.body.classList.toggle("theme-dark", isDark);
@@ -522,9 +526,9 @@
       <div id="form-alert" class="mt-2"></div>`;
         document.getElementById("vcForm").onsubmit = function (event) {
           event.preventDefault();
-          const studentId = document.getElementById("studentId").value.trim();
-          const name = document.getElementById("name").value.trim();
-          const className = document.getElementById("className").value.trim();
+          lastStudentId = document.getElementById("studentId").value.trim();
+          lastName = document.getElementById("name").value.trim();
+          lastClassName = document.getElementById("className").value.trim();
           document.getElementById(
             "form-alert"
           ).innerHTML = `<div class="alert alert-info mt-2 text-center">產生中...</div>`;
@@ -542,9 +546,9 @@
               if (result.success) {
                 currentTransactionId = result.transactionId;
                 renderStep2(
-                  studentId,
-                  name,
-                  className,
+                  lastStudentId,
+                  lastName,
+                  lastClassName,
                   result.qrCode,
                   result.transactionId,
                   result.deepLink
@@ -556,7 +560,6 @@
                 );
               }
             })
-
             .catch(() => {
               showFormAlert("伺服器未回應，請檢查後端。", false);
             });
@@ -579,37 +582,39 @@
       ) {
         setActiveStep(2);
         document.getElementById("step-content").innerHTML = `
-    <div class="alert alert-success text-center fade-in mb-2">
-      表單送出成功，請使用數位皮夾 App 掃描 QR Code 領取憑證！
-    </div>
-    <div class="qrcode-area fade-in">
-      <img alt="QRCode" src="${
-        qrCode.startsWith("data:image/png;base64,")
-          ? qrCode
-          : "data:image/png;base64," + qrCode
-      }">
-    </div>
-    <div class="vc-meta fade-in">
-      <div>學號：<b>${studentId}</b></div>
-      <div>姓名：<b>${name}</b></div>
-      <div>班級：<b>${className}</b></div>
-    </div>
-    ${
-      deepLink
-        ? `
-      <div class="text-center mb-3">
-        <a href="${deepLink}" class="btn btn-success" style="font-size:1.09rem;" target="_blank">
-          <i class="fa-solid fa-mobile"></i> 直接開啟數位憑證皮夾APP領取
-        </a>
-        <div style="font-size:.99em;color:#888;margin-top:3px;">如手機沒掃到QRCode可直接點此連結</div>
-      </div>
-    `
-        : ""
-    }
-    <div id="polling-status" class="mt-2 mb-3 text-secondary text-center fade-in">等待學生掃描領取憑證...</div>
-    <div class="d-grid"><button class="btn btn-outline-secondary btn-sm w-100 mt-1" onclick="renderStep1()">← 重新操作</button></div>
-  `;
-        startPolling();
+          <div class="alert alert-success text-center fade-in mb-2">
+            表單送出成功，請使用數位皮夾 App 掃描 QR Code 領取憑證！
+          </div>
+          <div class="qrcode-area fade-in">
+            <img alt="QRCode" src="${
+              qrCode.startsWith("data:image/png;base64,")
+                ? qrCode
+                : "data:image/png;base64," + qrCode
+            }">
+          </div>
+          <div class="vc-meta fade-in">
+            <div>學號：<b>${studentId}</b></div>
+            <div>姓名：<b>${name}</b></div>
+            <div>班級：<b>${className}</b></div>
+          </div>
+          ${
+            deepLink
+              ? `
+            <div class="text-center mb-3">
+              <a href="${deepLink}" class="btn btn-success" style="font-size:1.09rem;" target="_blank">
+                <i class="fa-solid fa-mobile"></i> 直接開啟數位憑證皮夾APP領取
+              </a>
+              <div style="font-size:.99em;color:#888;margin-top:3px;">如手機沒掃到QRCode可直接點此連結</div>
+            </div>
+          `
+              : ""
+          }
+          <div id="polling-status" class="mt-2 mb-3 text-secondary text-center fade-in">等待學生掃描領取憑證...</div>
+          <div class="d-grid"><button class="btn btn-outline-secondary btn-sm w-100 mt-1" onclick="renderStep1()">← 重新操作</button></div>
+        `;
+        startPolling(function (cid) {
+          renderStep3(cid, studentId, name, className);
+        });
       }
 
       function renderStep3(cid, studentId, name, className) {
@@ -617,14 +622,25 @@
         document.getElementById("step-content").innerHTML = `
           <div class="alert alert-success text-center fade-in mb-2">憑證發送成功，學生已領取！</div>
           <div class="cid-highlight fade-in">CID：${cid}</div>
-          <div class="vc-meta fade-in">
+          <div class="vc-meta fade-in" id="cidCopyZone">
             <div>醫療機構：<b>抬大醫院</b></div>
             <div>證明醫師：<b>賴普拿疼</b></div>
             <div>學號：<b>${studentId}</b></div>
             <div>姓名：<b>${name}</b></div>
             <div>班級：<b>${className}</b></div>
           </div>
-          <!-- 其餘按鈕區不變 -->
+          <div class="d-grid gap-2 mb-2 mt-2">
+            <button class="btn btn-warning btn-sm" onclick="copyCID('${cid}')">
+              <i class="fa-regular fa-copy"></i> 複製CID
+            </button>
+            <button class="btn btn-danger" onclick="confirmRevoke('${cid}')">
+              <i class="fa-solid fa-ban"></i> 撤銷憑證
+            </button>
+            <button class="btn btn-primary" onclick="renderStep1()">
+              發行下一張憑證
+            </button>
+          </div>
+          <div id="revokeRes" class="mt-2"></div>
         `;
       }
 
@@ -661,7 +677,7 @@
           });
       }
 
-      function startPolling() {
+      function startPolling(onSuccess) {
         if (pollingInterval) clearInterval(pollingInterval);
         if (!currentTransactionId) return;
         pollingInterval = setInterval(() => {
@@ -670,11 +686,13 @@
             .then((data) => {
               if (data.received === true) {
                 clearInterval(pollingInterval);
-                renderStep3(data.cid || "（查無CID）");
+                if (onSuccess) onSuccess(data.cid || "（查無CID）");
               }
             });
         }, 3000);
       }
+
+      // 複製CID到剪貼簿
       function copyCID(cid) {
         if (navigator.clipboard) {
           navigator.clipboard.writeText(cid);
@@ -689,8 +707,44 @@
               document.querySelector("#cidCopyZone span:last-child").remove(),
             1200
           );
+        } else {
+          alert("瀏覽器不支援剪貼簿功能");
         }
       }
+
+      // 撤銷憑證API（這段會連到你後端API）
+      function confirmRevoke(cid) {
+        if (!cid) return alert("CID錯誤，無法撤銷。");
+        if (!confirm("確定要撤銷這個憑證嗎？此操作不可復原。")) return;
+        document.getElementById(
+          "revokeRes"
+        ).innerHTML = `<div class="alert alert-info text-center">正在撤銷憑證...</div>`;
+        fetch("/api/revoke-credential", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cid: cid, action: "revocation" }),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.success) {
+              document.getElementById(
+                "revokeRes"
+              ).innerHTML = `<div class="alert alert-success text-center">撤銷成功 ${cid} <br><small>(狀態已同步至數位憑證皮夾 APP)</small></div>`;
+            } else {
+              document.getElementById(
+                "revokeRes"
+              ).innerHTML = `<div class="alert alert-danger text-center">${
+                result.error || "撤銷失敗"
+              }</div>`;
+            }
+          })
+          .catch(() => {
+            document.getElementById(
+              "revokeRes"
+            ).innerHTML = `<div class="alert alert-danger text-center">伺服器連線失敗，請稍後再試。</div>`;
+          });
+      }
+
       function renderHistory() {
         document.getElementById(
           "step-content"
