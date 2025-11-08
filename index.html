@@ -526,9 +526,9 @@
       <div id="form-alert" class="mt-2"></div>`;
         document.getElementById("vcForm").onsubmit = function (event) {
           event.preventDefault();
-          lastStudentId = document.getElementById("studentId").value.trim();
-          lastName = document.getElementById("name").value.trim();
-          lastClassName = document.getElementById("className").value.trim();
+          const studentId = document.getElementById("studentId").value.trim();
+          const name = document.getElementById("name").value.trim();
+          const className = document.getElementById("className").value.trim();
           document.getElementById(
             "form-alert"
           ).innerHTML = `<div class="alert alert-info mt-2 text-center">產生中...</div>`;
@@ -537,7 +537,7 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               student: studentId,
-              name,
+              name: name,
               class: className,
             }),
           })
@@ -546,9 +546,9 @@
               if (result.success) {
                 currentTransactionId = result.transactionId;
                 renderStep2(
-                  lastStudentId,
-                  lastName,
-                  lastClassName,
+                  studentId,
+                  name,
+                  className,
                   result.qrCode,
                   result.transactionId,
                   result.deepLink
