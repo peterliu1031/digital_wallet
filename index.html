@@ -2,7 +2,7 @@
 <html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
-    <title>校園請假憑證發行端 - RWD全功能Demo</title>
+    <title>校園請假憑證發行端</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link
       rel="stylesheet"
@@ -16,7 +16,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
-    <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
     <style>
       body {
         background: linear-gradient(120deg, #e7f0fe 0%, #fffbe6 100%);
@@ -57,15 +56,13 @@
       .header-main {
         font-size: 2.15rem;
         font-weight: 700;
+        color: #226b9a;
         text-align: center;
         letter-spacing: 3px;
         transition: 0.4s;
         flex: 1;
       }
-      .header-dark {
-        color: #226b9a;
-      }
-      .header-light {
+      body.theme-dark .header-main {
         color: #ffd600;
       }
       .header-sub {
@@ -85,25 +82,67 @@
       }
       .theme-switch label {
         cursor: pointer;
-        padding: 6px 14px;
+        padding: 6px 16px 6px 14px;
         border-radius: 13px;
-        background: #23283d;
-        border: 1.5px solid #ffd600;
+        background: #e7f4ff;
+        border: 1.5px solid #a7daf6;
         font-weight: 700;
         user-select: none;
         transition: 0.2s;
         font-size: 0.97rem;
-        min-width: 50px;
+        min-width: 48px;
         display: inline-flex;
         align-items: center;
         gap: 7px;
-        color: #ffd600;
+        color: #226b9a;
       }
       body.theme-dark .theme-switch label {
-        background: #e7f4ff;
-        color: #226b9a;
-        border-color: #226b9a;
+        background: #23283d;
+        color: #ffd600;
+        border-color: #ffd600;
       }
+      .theme-icon {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 0 1px 7px #fed 0.16;
+        border: 1.7px solid #fed600;
+        margin-right: 5px;
+        margin-left: 1px;
+        background: #fffde7;
+        overflow: hidden;
+        vertical-align: middle;
+      }
+      .theme-icon .half {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 50%;
+        height: 100%;
+      }
+      .theme-icon .half.left {
+        left: 0;
+        background: #343650;
+      }
+      .theme-icon .half.right {
+        right: 0;
+        background: transparent;
+      }
+      body.theme-dark .theme-icon {
+        background: #23283d;
+        border-color: #ffd600;
+      }
+      body.theme-dark .theme-icon .half.left {
+        left: 0;
+        background: transparent;
+      }
+      body.theme-dark .theme-icon .half.right {
+        right: 0;
+        background: #ffd600;
+      }
+
       .tab-nav {
         display: flex;
         justify-content: flex-start;
@@ -113,11 +152,17 @@
         margin-bottom: 9px;
         flex-wrap: nowrap;
         border-bottom: 1.5px solid #eef;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
       }
       .tab-nav::-webkit-scrollbar {
         display: none;
       }
       .tab-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* 圓角和邊框同前 */
         background: none;
         border: none;
         color: #777;
@@ -126,12 +171,22 @@
         font-weight: 600;
         letter-spacing: 1px;
         white-space: nowrap;
-        text-align: center;
-        min-width: 88px;
+        min-width: 112px; /* 關鍵：給足空間兩側均勻 */
         max-width: 160px;
         transition: 0.3s;
         font-size: 1rem;
         margin-bottom: 0;
+        box-sizing: border-box;
+      }
+      .tab-btn i {
+        margin-right: 7px;
+        margin-left: 0;
+      }
+      .tab-btn span {
+        display: block;
+        flex: 1 1 auto;
+        text-align: center;
+        /* 用於字置中，字不溢出時會左右等寬 */
       }
       .tab-btn.active,
       .tab-btn:focus {
@@ -148,35 +203,18 @@
       }
       @media (max-width: 600px) {
         .tab-btn {
-          min-width: 68px;
-          max-width: 109px;
-          padding: 7px 10px;
+          min-width: 95px;
+          max-width: 115px;
+          padding: 7px 11px;
           font-size: 0.97em;
           margin-right: 8px !important;
         }
         .tab-nav {
-          gap: 10px;
+          gap: 8px;
           padding-right: 18px;
         }
-        .vc-card {
-          width: 99vw;
-          min-height: unset;
-          padding: 14px 7vw 15px 7vw;
-        }
-        .header-main {
-          font-size: 1.22rem;
-        }
-        .stepper {
-          gap: 7px;
-        }
-        .cid-highlight {
-          font-size: 0.97rem;
-        }
-        .faq-btn {
-          top: 8px;
-          left: 8px;
-        }
       }
+
       .stepper {
         display: flex;
         align-items: center;
@@ -222,7 +260,6 @@
       body.theme-dark .stepper-line {
         color: #38373d;
       }
-
       .qrcode-area {
         display: flex;
         justify-content: center;
@@ -335,32 +372,35 @@
   <body>
     <div class="vc-card" id="VCApp">
       <div class="header-row">
-        <!-- 亮色時顯示暗icon/字，暗色時顯示亮icon/字 -->
-        <div
-          class="header-main header-dark"
-          id="mainTitle"
-          style="display: flex; align-items: center; gap: 10px"
-        >
-          <i class="fa-solid fa-moon" id="iconDark"></i>
-          <span>校園請假憑證</span>
-        </div>
+        <div class="header-main">校園請假憑證</div>
         <div class="theme-switch">
           <input type="checkbox" id="themeToggler" />
-          <label for="themeToggler"
-            ><i class="fa-solid fa-sun" id="iconLight"></i>亮</label
-          >
+          <label for="themeToggler">
+            <span class="theme-icon">
+              <span class="half left"></span>
+              <span class="half right"></span>
+            </span>
+            <span id="switchText">暗</span>
+          </label>
         </div>
       </div>
       <div class="header-sub">Campus Leave Certificate - 發行端</div>
-      <div class="tab-nav mb-2">
+      <div class="tab-nav mb-2" id="tabNav">
         <button class="tab-btn active" onclick="tabSwitch('issue')">
-          <i class="fa-solid fa-certificate"></i>憑證發行
+          <span class="tab-inner"
+            ><i class="fa-solid fa-certificate tab-icon"></i>憑證發行</span
+          >
         </button>
         <button class="tab-btn" onclick="tabSwitch('history')">
-          <i class="fa-solid fa-clock-rotate-left"></i>發行紀錄
+          <span class="tab-inner"
+            ><i class="fa-solid fa-clock-rotate-left tab-icon"></i
+            >發行紀錄</span
+          >
         </button>
         <button class="tab-btn" onclick="tabSwitch('help')">
-          <i class="fa-solid fa-circle-info"></i>說明FAQ
+          <span class="tab-inner"
+            ><i class="fa-solid fa-circle-info tab-icon"></i>說明FAQ</span
+          >
         </button>
       </div>
       <div class="stepper mb-2" id="stepper-wrap">
@@ -391,29 +431,16 @@
       </div>
     </div>
     <script>
-      // 暗亮模式動態title/icon調整
+      // 暗亮主題切換（icon視覺與文字）
       function applyThemeChange(isDark) {
-        let title = document.getElementById("mainTitle");
-        let iconDark = document.getElementById("iconDark");
-        let iconLight = document.getElementById("iconLight");
-        if (isDark) {
-          document.body.classList.add("theme-dark");
-          title.classList.remove("header-dark");
-          title.classList.add("header-light");
-          iconDark.style.display = "none";
-          iconLight.style.display = "inline-block";
-        } else {
-          document.body.classList.remove("theme-dark");
-          title.classList.remove("header-light");
-          title.classList.add("header-dark");
-          iconDark.style.display = "inline-block";
-          iconLight.style.display = "none";
-        }
+        document.body.classList.toggle("theme-dark", isDark);
+        document.getElementById("switchText").textContent = isDark
+          ? "亮"
+          : "暗";
       }
       document.getElementById("themeToggler").onchange = function (e) {
         applyThemeChange(e.target.checked);
       };
-      // 一開始default亮色icon（moon顯示、sun隱藏）
       document.addEventListener("DOMContentLoaded", () => {
         applyThemeChange(false);
       });
@@ -442,12 +469,12 @@
       tabSwitch("issue");
       function tabSwitch(tab) {
         currentTab = tab;
-        document.querySelectorAll(".tab-btn").forEach((btn) => {
+        document.querySelectorAll(".tab-btn").forEach((btn, i) => {
           btn.classList.toggle(
             "active",
-            btn.textContent.includes(
-              tab === "issue" ? "憑證" : tab === "history" ? "紀錄" : "FAQ"
-            )
+            (tab === "issue" && i == 0) ||
+              (tab === "history" && i == 1) ||
+              (tab === "help" && i == 2)
           );
         });
         document.getElementById("stepper-wrap").style.display =
@@ -556,15 +583,53 @@
       function renderStep3(cid) {
         setActiveStep(3);
         document.getElementById("step-content").innerHTML = `
-        <div class="alert alert-success text-center fade-in mb-2">憑證發送成功，學生已領取！</div>
-        <div class="cid-highlight fade-in">CID：${cid}</div>
-        <div class="vc-meta fade-in" id="cidCopyZone">
-          <span class="me-2">複製憑證ID到剪貼簿</span>
-          <button class="btn btn-warning btn-sm" onclick="copyCID('${cid}')">複製</button>
-        </div>
-        <div class="d-grid"><button class="btn btn-primary w-100 mt-2" onclick="renderStep1()">發行下一張憑證</button></div>
-      `;
+    <div class="alert alert-success text-center fade-in mb-2">憑證發送成功，學生已領取！</div>
+    <div class="cid-highlight fade-in">CID：${cid}</div>
+    <div class="vc-meta fade-in" id="cidCopyZone">
+      <span class="me-2">複製憑證ID到剪貼簿</span>
+      <button class="btn btn-warning btn-sm" onclick="copyCID('${cid}')">複製</button>
+    </div>
+    <div id="revokeRes" class="mt-2"></div>
+    <div class="d-grid">
+      <button class="btn btn-danger w-100 mt-2" onclick="confirmRevoke('${cid}')">撤銷憑證</button>
+      <button class="btn btn-primary w-100 mt-2" onclick="renderStep1()">發行下一張憑證</button>
+    </div>
+  `;
       }
+
+      // 新增撤銷API流程function
+      function confirmRevoke(cid) {
+        if (!cid) return alert("CID錯誤，無法撤銷。");
+        if (!confirm("確定要撤銷這個憑證嗎？此操作不可復原。")) return;
+        document.getElementById(
+          "revokeRes"
+        ).innerHTML = `<div class="alert alert-info text-center">正在撤銷憑證...</div>`;
+        fetch("/api/revoke-credential", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cid: cid, action: "revocation" }),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            if (result.success) {
+              document.getElementById(
+                "revokeRes"
+              ).innerHTML = `<div class="alert alert-success text-center">撤銷成功 ${cid} <br><small>(狀態已同步至數位憑證皮夾 APP)</small></div>`;
+            } else {
+              document.getElementById(
+                "revokeRes"
+              ).innerHTML = `<div class="alert alert-danger text-center">${
+                result.error || "撤銷失敗"
+              }</div>`;
+            }
+          })
+          .catch(() => {
+            document.getElementById(
+              "revokeRes"
+            ).innerHTML = `<div class="alert alert-danger text-center">伺服器連線失敗，請稍後再試。</div>`;
+          });
+      }
+
       function startPolling() {
         if (pollingInterval) clearInterval(pollingInterval);
         if (!currentTransactionId) return;
@@ -617,7 +682,7 @@
         document.getElementById(
           "step-content"
         ).innerHTML = `<div class="vc-meta fade-in" style="text-align:left;">
-          <i class="fa-solid fa-circle-info me-2"></i><b>常見問題 FAQ</b><br>
+          <i class="fa-solid fa-circle-info tab-icon"></i><b>常見問題 FAQ</b><br>
           <ul style="padding-left:2.3vw;margin-top:0.8vw;">
             <li><b>如何領取請假憑證？</b><br>填寫表單並掃描QRcode即可。</li>
             <li><b>CID有何用途？</b><br>可用於校方查驗真偽。</li>

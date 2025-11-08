@@ -121,5 +121,37 @@ def serve_index():
 def health_check():
     return {'status': 'OK'}, 200
 
+@app.route('/api/revoke-credential', methods=['PUT'])
+def revoke_credential():
+    try:
+        # 前端送 json: {"cid":"xxx", "action":"revocation"}
+        data = request.get_json(force=True)
+        cid = data.get('cid')
+        action = data.get('action', 'revocation')
+        if not cid:
+            return jsonify({'error': '缺少cid'}), 400
+        if action != "revocation":
+            return jsonify({'error': '目前僅支援revocation'}), 400
+
+        url = f"https://issuer-sandbox.wallet.gov.tw/api/credential/{cid}/{action}"
+        headers = {
+            'Access-Token': ACCESS_TOKEN,
+            'accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        resp = requests.put(url, headers=headers)
+
+        if not str(resp.status_code).startswith("2"):
+            return jsonify({'error': f'API錯誤: {resp.status_code}: {resp.text}'}), 500
+
+        try:
+            return jsonify({'success': True, 'result': resp.json()})
+        except:
+            return jsonify({'success': True, 'result_raw': resp.text})
+    except Exception as e:
+        print("Exception:", e)
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
