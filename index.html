@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>校園請假憑證發行端 – 高互動動畫DEMO+API</title>
+  <title>校園請假憑證發行端 – UI全修正</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <!-- Bootstrap、Icon、Font、Lottie動畫 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -20,15 +20,11 @@
       background: linear-gradient(120deg,#191d24 0%,#2f2a36 100%) !important;
       color: #ffe082!important;
     }
-    .side-bg-lottie {
-      position:fixed;top:0;right:0;width:46vw;max-width:550px;height:100vh;z-index:0;pointer-events:none;overflow:hidden;
-    }
-    @media (max-width:870px){ .side-bg-lottie {display:none;} }
     .vc-card {
       background: #fff;
       border-radius: 18px;
       box-shadow: 0 2px 28px 0 #b8d2df44;
-      max-width: 98vw; width:440px;
+      max-width: 98vw; width:450px;
       margin: clamp(10px,7vw,54px) auto 38px auto;
       padding: clamp(13px,6vw,38px);
       min-height:450px;
@@ -36,8 +32,8 @@
       transition: background .4s,color .4s;
     }
     .theme-dark .vc-card, body.theme-dark .vc-card {
-      background:#22282c;
-      color:#fde99c;
+      background: #22282c;
+      color: #fde99c;
     }
     .header-main {
       font-size: 2.15rem;font-weight: 700;color: #226b9a;
@@ -46,7 +42,7 @@
     .theme-dark .header-main, body.theme-dark .header-main {color:#ffd600;}
     .header-sub {font-size: .95rem;color: #888;text-align: center;margin-bottom: 15px;}
     .theme-dark .header-sub, body.theme-dark .header-sub {color:#ffe082;}
-    .tab-nav {display:flex;justify-content:center;margin-bottom:14px;gap:18px;font-size:1.07rem;}
+    .tab-nav {display:flex;justify-content:center;margin-bottom:14px;gap:18px;font-size:1.07rem;flex-wrap:nowrap;overflow-x:auto;}
     .tab-btn {background:none;border:none;color: #777;padding:5px 14px;border-radius:9px;font-weight:600;letter-spacing:1px;}
     .tab-btn.active, .tab-btn:focus {background: #e0edf8;color: #226b9a;border: 1.5px solid #ffc107;box-shadow: 0 2px 8px #ffe9b3;}
     .theme-dark .tab-btn.active, body.theme-dark .tab-btn.active,
@@ -95,30 +91,15 @@
     }
     .fade-in { animation: fadeIn .7s; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(13px);} to {opacity: 1; transform: none;} }
-    .scan-btn {background: #ffb300;color: #fff;border: none;border-radius: 8px;font-weight: bold;
-      margin-top: 8px;padding: 8px 19px;font-size: 1.08rem;transition: background 0.2s;box-shadow: 0 1px 4px #ffecb3;}
-    .scan-btn:hover { background: #e6a000; }
-    .fa-id-card, .fa-user, .fa-users, .fa-house-laptop {margin-right:7px;color: #226b9a;}
-    .d-grid {margin:12px 0;}
     .faq-pop {background:#fffbe8;border-radius:16px;box-shadow:0 2px 16px #fce6aa99;
       padding:15px 16px;position:fixed;top:12vh;left:50%;transform:translateX(-50%);
       min-width:219px;max-width:95vw;font-size:0.98rem;z-index:99;border:1.6px solid #ffe082;color:#666;display:none;}
-    .theme-dark .faq-pop, body.theme-dark .faq-pop{background:#373200;color:#ffe082;border-color:#fbe67e;}
+    .theme-dark .faq-pop, body.theme-dark .faq-pop {background:#22252a;color:#ffed81;border-color:#ffd600;}
     .faq-pop.active {display:block;}
     .faq-btn { background:none; border:none; font-size:1.35rem;color:#ffc107;z-index:100;position:absolute;top:18px;left:8px;}
-    @media (max-width:520px){
-      .vc-card {width:99vw; min-height:unset;padding:7px 2vw 13px 2vw;}
-      .header-main {font-size:1.25rem;}
-      .cid-highlight {font-size:0.94rem;}
-      .vc-meta, .faq-pop {font-size:0.90rem;}
-    }
   </style>
 </head>
 <body>
-  <!-- 高質感背景Lottie動畫 -->
-  <div class="side-bg-lottie">
-    <div id="bgLottie" style="width:430px;height:430px;position:absolute;right:-66px;top:130px;opacity:0.11"></div>
-  </div>
   <div class="vc-card" id="VCApp">
     <div class="theme-switch">
       <input type="checkbox" id="themeToggler"/>
@@ -139,7 +120,6 @@
       <div id="step3" class="stepper-step">3</div>
     </div>
     <div id="step-content" class="fade-in"></div>
-    <!-- FAQ PopUp -->
     <button class="faq-btn" id="faqBtn" onclick="showFaqPop()"><i class="fa-solid fa-circle-question"></i></button>
     <div class="faq-pop" id="faqPop">
       <b>常見問題 FAQ</b><br>
@@ -153,30 +133,21 @@
     </div>
   </div>
   <script>
-    // 背景動畫
-    lottie.loadAnimation({container: document.getElementById('bgLottie'),renderer:'svg',loop:true,autoplay:true,path:'https://assets6.lottiefiles.com/packages/lf20_tno6cg2w.json'});
-    // 主題切換
     document.getElementById("themeToggler").onchange = function(e){
       if(e.target.checked) document.body.classList.add('theme-dark');
       else document.body.classList.remove('theme-dark');
     }
-    // FAQ浮窗
     function showFaqPop(){document.getElementById("faqPop").classList.add("active");}
     function hideFaqPop(){ document.getElementById("faqPop").classList.remove("active"); }
-    // tab管理
     let pollingInterval = null, currentTransactionId = null;
-    let cid = '';
-    let currentTab = 'issue';
-    // 發行記錄DEMO
+    let cid = '', currentTab = 'issue';
     const historyItems = [
       {date:'2025/11/01', sid:'A12345678', status:'成功'},
       {date:'2025/10/28', sid:'B987654', status:'已撤銷'},
       {date:'2025/10/23', sid:'X13322132', status:'成功'},
     ];
     function setActiveStep(s) {
-      for(let i = 1; i <= 3; i++) {
-        document.getElementById('step'+i).classList.toggle('active', i === s);
-      }
+      for(let i = 1; i <= 3; i++) { document.getElementById('step'+i).classList.toggle('active', i === s);}
     }
     tabSwitch('issue');
     function tabSwitch(tab) {
@@ -192,7 +163,6 @@
         case 'help': renderHelp(); break;
       }
     }
-    // ====== 發行流程整合flask API ===============================
     function renderStep1() {
       setActiveStep(1);
       document.getElementById("step-content").innerHTML = `
@@ -219,7 +189,6 @@
         const name = document.getElementById("name").value.trim();
         const className = document.getElementById("className").value.trim();
         document.getElementById("form-alert").innerHTML = `<div class="alert alert-info mt-2 text-center">產生中...</div>`;
-        // 調用API ===================
         fetch("/api/generate-vc", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -293,7 +262,6 @@
         setTimeout(()=>document.querySelector("#cidCopyZone span:last-child").remove(), 1200);
       }
     }
-    // =======demo紀錄/FAQ=========
     function renderHistory() {
       document.getElementById("step-content").innerHTML =
         `<div class="vc-meta fade-in" style="background:#fffbe7;color:#ce9800;text-align:left;">
