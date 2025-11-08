@@ -1,171 +1,433 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>校園請假憑證發行端 – UI全修正</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- Bootstrap、Icon、Font、Lottie動畫 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
-  <style>
-    html,body {height:100%;min-height:100%;}
-    body {
-      background: linear-gradient(120deg, #e7f0fe 0%, #fffbe6 100%);
-      font-family: 'Noto Sans TC',sans-serif;
-      transition: background .5s;
-    }
-    .theme-dark body, body.theme-dark {
-      background: linear-gradient(120deg,#191d24 0%,#2f2a36 100%) !important;
-      color: #ffe082!important;
-    }
-    .vc-card {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 2px 28px 0 #b8d2df44;
-      max-width: 98vw; width:450px;
-      margin: clamp(10px,7vw,54px) auto 38px auto;
-      padding: clamp(13px,6vw,38px);
-      min-height:450px;
-      position:relative; z-index:3;
-      transition: background .4s,color .4s;
-    }
-    .theme-dark .vc-card, body.theme-dark .vc-card {
-      background: #22282c;
-      color: #fde99c;
-    }
-    .header-main {
-      font-size: 2.15rem;font-weight: 700;color: #226b9a;
-      text-align: center;letter-spacing: 3px;margin-bottom: 2px;transition:.5s;
-    }
-    .theme-dark .header-main, body.theme-dark .header-main {color:#ffd600;}
-    .header-sub {font-size: .95rem;color: #888;text-align: center;margin-bottom: 15px;}
-    .theme-dark .header-sub, body.theme-dark .header-sub {color:#ffe082;}
-    .tab-nav {display:flex;justify-content:center;margin-bottom:14px;gap:18px;font-size:1.07rem;flex-wrap:nowrap;overflow-x:auto;}
-    .tab-btn {background:none;border:none;color: #777;padding:5px 14px;border-radius:9px;font-weight:600;letter-spacing:1px;}
-    .tab-btn.active, .tab-btn:focus {background: #e0edf8;color: #226b9a;border: 1.5px solid #ffc107;box-shadow: 0 2px 8px #ffe9b3;}
-    .theme-dark .tab-btn.active, body.theme-dark .tab-btn.active,
-    .theme-dark .tab-btn:focus, body.theme-dark .tab-btn:focus {background: #2d3244;color: #ffe082;border-color:#ffe082;}
-    .theme-switch {position:absolute;top:15px;right:15px;z-index:24;}
-    .theme-switch input {display:none;}
-    .theme-switch label {
-      cursor:pointer;padding:6px 14px;border-radius:11px;color:#226b9a;background:#e7f4ff;
-      border:1.5px solid #a7daf6;font-weight:700;transition:background 0.2s; user-select:none;
-    }
-    .theme-dark .theme-switch label, body.theme-dark .theme-switch label {background:#2f394d;color:#ffe082;border-color:#ffe082;}
-    .stepper {display: flex;align-items: center;justify-content: center;margin-bottom: 12px;gap: 10px;}
-    .stepper-step {
-      width: 25px; height: 25px; min-width:25px;border-radius: 50%; background: #e0edf8;
-      color: #226b9a; font-weight: 700; font-size: 1.06rem;border: 2px solid #e0edf8; transition: 0.3s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .stepper-step.active {background: #fff;border-color: #ffc107;color: #b07913;box-shadow: 0 2px 7px #ffe9b3;}
-    .theme-dark .stepper-step, body.theme-dark .stepper-step {background:#35373b;color:#ffe082;border-color:#34343b;}
-    .theme-dark .stepper-step.active, body.theme-dark .stepper-step.active{background:#22292e;border-color:#ffe082;color:#ffe082;}
-    .stepper-line {font-size:1.23rem;color:#b8d2df;margin: 0 4px;}
-    .theme-dark .stepper-line, body.theme-dark .stepper-line {color:#38373d;}
-    .qrcode-area img {
-      width:clamp(128px,40vw,200px); max-width:220px; box-shadow: 0 2px 18px #BBD7E7;
-      border-radius: 13px;background: #f1f8fe;border: 5px solid #fffde7;margin:6px 0;transition:.3s;
-      animation: popQ .73s cubic-bezier(0.23,1.25,.48,.82);
-    }
-    @keyframes popQ { from{transform:scale(.6) rotate(-8deg); opacity:0;} to{transform:none;opacity:1;}}
-    .theme-dark .qrcode-area img, body.theme-dark .qrcode-area img {background:#3d4146;border-color:#444;}
-    .scan-hint {font-size:1.1rem;color: #ff9800;text-align:center;margin-bottom: 6px;font-weight:600;}
-    .vc-meta {
-      background: #e7f4ff;border-radius: 14px;padding: 13px 11px;color: #356;
-      font-size: 1rem;margin-bottom:8px;line-height: 1.63;
-      border-left: 4px solid #ffc107;text-align: center;word-break:break-all;transition:.5s;
-    }
-    .theme-dark .vc-meta, body.theme-dark .vc-meta {background:#28292a;color:#ffe082;border-left:4px solid #ffd600;}
-    .cid-highlight {
-      font-size: 1.17rem;font-weight: 700;color: #aa7c1b;letter-spacing: 1px;
-      background: linear-gradient(90deg, #fff3cd 10%, #fffde7 90%);
-      border-radius: 9px;padding: 7px 12px;display: inline-block;margin: 4px 0 10px 0;transition:.5s;
-      box-shadow:0 3px 22px #ffe08222
-    }
-    .theme-dark .cid-highlight, body.theme-dark .cid-highlight {
-      background:linear-gradient(90deg,#463e13 10%,#665400 90%);
-      color:#ffc107;
-    }
-    .fade-in { animation: fadeIn .7s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(13px);} to {opacity: 1; transform: none;} }
-    .faq-pop {background:#fffbe8;border-radius:16px;box-shadow:0 2px 16px #fce6aa99;
-      padding:15px 16px;position:fixed;top:12vh;left:50%;transform:translateX(-50%);
-      min-width:219px;max-width:95vw;font-size:0.98rem;z-index:99;border:1.6px solid #ffe082;color:#666;display:none;}
-    .theme-dark .faq-pop, body.theme-dark .faq-pop {background:#22252a;color:#ffed81;border-color:#ffd600;}
-    .faq-pop.active {display:block;}
-    .faq-btn { background:none; border:none; font-size:1.35rem;color:#ffc107;z-index:100;position:absolute;top:18px;left:8px;}
-  </style>
-</head>
-<body>
-  <div class="vc-card" id="VCApp">
-    <div class="theme-switch">
-      <input type="checkbox" id="themeToggler"/>
-      <label for="themeToggler"><i class="fa-solid fa-circle-half-stroke me-1"></i> 暗色模式</label>
-    </div>
-    <div class="header-main"><i class="fa-solid fa-house-laptop"></i>校園請假憑證</div>
-    <div class="header-sub">Campus Leave Certificate - 發行端(API+互動DEMO)</div>
-    <div class="tab-nav mb-2">
-      <button class="tab-btn active" onclick="tabSwitch('issue')"><i class="fa-solid fa-certificate"></i>憑證發行</button>
-      <button class="tab-btn" onclick="tabSwitch('history')"><i class="fa-solid fa-clock-rotate-left"></i>發行紀錄</button>
-      <button class="tab-btn" onclick="tabSwitch('help')"><i class="fa-solid fa-circle-info"></i>說明FAQ</button>
-    </div>
-    <div class="stepper mb-2" id="stepper-wrap">
-      <div id="step1" class="stepper-step active">1</div>
-      <div class="stepper-line">—</div>
-      <div id="step2" class="stepper-step">2</div>
-      <div class="stepper-line">—</div>
-      <div id="step3" class="stepper-step">3</div>
-    </div>
-    <div id="step-content" class="fade-in"></div>
-    <button class="faq-btn" id="faqBtn" onclick="showFaqPop()"><i class="fa-solid fa-circle-question"></i></button>
-    <div class="faq-pop" id="faqPop">
-      <b>常見問題 FAQ</b><br>
-      <ul>
-        <li>如何領取請假憑證？<br>填寫表單並掃描QRcode即可。</li>
-        <li>憑證領取後 CID 有何用途？<br>可用於校方查驗真偽。</li>
-        <li>可以補領/撤銷嗎？<br>需由學校/醫院申請重發或撤銷。</li>
-        <li>若失敗或遺漏，重新操作即可。</li>
-      </ul>
-      <button class="btn btn-outline-primary btn-sm w-100 mt-1" onclick="hideFaqPop()">關閉FAQ</button>
-    </div>
-  </div>
-  <script>
-    document.getElementById("themeToggler").onchange = function(e){
-      if(e.target.checked) document.body.classList.add('theme-dark');
-      else document.body.classList.remove('theme-dark');
-    }
-    function showFaqPop(){document.getElementById("faqPop").classList.add("active");}
-    function hideFaqPop(){ document.getElementById("faqPop").classList.remove("active"); }
-    let pollingInterval = null, currentTransactionId = null;
-    let cid = '', currentTab = 'issue';
-    const historyItems = [
-      {date:'2025/11/01', sid:'A12345678', status:'成功'},
-      {date:'2025/10/28', sid:'B987654', status:'已撤銷'},
-      {date:'2025/10/23', sid:'X13322132', status:'成功'},
-    ];
-    function setActiveStep(s) {
-      for(let i = 1; i <= 3; i++) { document.getElementById('step'+i).classList.toggle('active', i === s);}
-    }
-    tabSwitch('issue');
-    function tabSwitch(tab) {
-      currentTab = tab;
-      document.querySelectorAll('.tab-btn').forEach(btn=>{
-        btn.classList.toggle('active', btn.textContent.includes(tab==='issue'?'憑證':tab==='history'?'紀錄':'FAQ'));
-      });
-      document.getElementById('stepper-wrap').style.display = tab==='issue'?"flex":"none";
-      document.getElementById('faqBtn').style.display = tab==='help'?'none':'inline-block';
-      switch(tab){
-        case 'issue': renderStep1(); break;
-        case 'history': renderHistory(); break;
-        case 'help': renderHelp(); break;
+  <head>
+    <meta charset="UTF-8" />
+    <title>校園請假憑證發行端 – UI全修正</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
+    <style>
+      html,
+      body {
+        height: 100%;
+        min-height: 100%;
       }
-    }
-    function renderStep1() {
-      setActiveStep(1);
-      document.getElementById("step-content").innerHTML = `
+      body {
+        background: linear-gradient(120deg, #e7f0fe 0%, #fffbe6 100%);
+        font-family: "Noto Sans TC", sans-serif;
+        transition: background 0.5s;
+      }
+      .theme-dark body,
+      body.theme-dark {
+        background: linear-gradient(
+          120deg,
+          #191d24 0%,
+          #2f2a36 100%
+        ) !important;
+        color: #ffe082 !important;
+      }
+      .vc-card {
+        background: #fff;
+        border-radius: 1.5vw;
+        box-shadow: 0 0.26vw 2vw 0 #b8d2df44;
+        max-width: 98vw;
+        width: 45vw;
+        margin: clamp(1vw, 7vw, 5vw) auto 2.5vw auto;
+        padding: clamp(1vw, 6vw, 2.5vw);
+        min-height: 40vw;
+        position: relative;
+        z-index: 3;
+        transition: background 0.4s, color 0.4s;
+      }
+      .theme-dark .vc-card,
+      body.theme-dark .vc-card {
+        background: #22282c;
+        color: #fde99c;
+      }
+      .header-main {
+        font-size: 2.15rem;
+        font-weight: 700;
+        color: #226b9a;
+        text-align: center;
+        letter-spacing: 3px;
+        margin-bottom: 2px;
+        transition: 0.5s;
+      }
+      .theme-dark .header-main,
+      body.theme-dark .header-main {
+        color: #ffd600;
+      }
+      .header-sub {
+        font-size: 0.95rem;
+        color: #888;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      .theme-dark .header-sub,
+      body.theme-dark .header-sub {
+        color: #ffe082;
+      }
+
+      /* ---- 修正tab-nav讓文字不換行且用比例寬度 ---- */
+      .tab-nav {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1vw;
+        gap: 2vw;
+        font-size: 1.07rem;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+      }
+      .tab-btn {
+        background: none;
+        border: none;
+        color: #777;
+        padding: 0.6vw 2vw;
+        border-radius: 0.9vw;
+        font-weight: 600;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        width: 21vw;
+        max-width: 140px;
+        min-width: 90px;
+        text-align: center;
+        transition: 0.3s;
+      }
+      .tab-btn.active,
+      .tab-btn:focus {
+        background: #e0edf8;
+        color: #226b9a;
+        border: 1.5px solid #ffc107;
+        box-shadow: 0 2px 8px #ffe9b3;
+      }
+      .theme-dark .tab-btn.active,
+      body.theme-dark .tab-btn.active,
+      .theme-dark .tab-btn:focus,
+      body.theme-dark .tab-btn:focus {
+        background: #2d3244;
+        color: #ffe082;
+        border-color: #ffe082;
+      }
+
+      .theme-switch {
+        position: absolute;
+        top: 1.5vw;
+        right: 1.5vw;
+        z-index: 24;
+      }
+      .theme-switch input {
+        display: none;
+      }
+      .theme-switch label {
+        cursor: pointer;
+        padding: 0.5vw 1.3vw;
+        border-radius: 1vw;
+        color: #226b9a;
+        background: #e7f4ff;
+        border: 1.5px solid #a7daf6;
+        font-weight: 700;
+        transition: background 0.2s;
+        user-select: none;
+      }
+      .theme-dark .theme-switch label,
+      body.theme-dark .theme-switch label {
+        background: #2f394d;
+        color: #ffe082;
+        border-color: #ffe082;
+      }
+      .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        gap: 1vw;
+      }
+      .stepper-step {
+        width: 2vw;
+        height: 2vw;
+        min-width: 2vw;
+        border-radius: 50%;
+        background: #e0edf8;
+        color: #226b9a;
+        font-weight: 700;
+        font-size: 1.06rem;
+        border: 2px solid #e0edf8;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .stepper-step.active {
+        background: #fff;
+        border-color: #ffc107;
+        color: #b07913;
+        box-shadow: 0 2px 7px #ffe9b3;
+      }
+      .theme-dark .stepper-step,
+      body.theme-dark .stepper-step {
+        background: #35373b;
+        color: #ffe082;
+        border-color: #34343b;
+      }
+      .theme-dark .stepper-step.active,
+      body.theme-dark .stepper-step.active {
+        background: #22292e;
+        border-color: #ffe082;
+        color: #ffe082;
+      }
+      .stepper-line {
+        font-size: 1.23rem;
+        color: #b8d2df;
+        margin: 0 4px;
+      }
+      .theme-dark .stepper-line,
+      body.theme-dark .stepper-line {
+        color: #38373d;
+      }
+      .qrcode-area img {
+        width: clamp(10vw, 40vw, 20vw);
+        max-width: 22vw;
+        box-shadow: 0 2px 18px #bbd7e7;
+        border-radius: 1vw;
+        background: #f1f8fe;
+        border: 0.5vw solid #fffde7;
+        margin: 0.5vw 0;
+        transition: 0.3s;
+        animation: popQ 0.73s cubic-bezier(0.23, 1.25, 0.48, 0.82);
+      }
+      @keyframes popQ {
+        from {
+          transform: scale(0.6) rotate(-8deg);
+          opacity: 0;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      .theme-dark .qrcode-area img,
+      body.theme-dark .qrcode-area img {
+        background: #3d4146;
+        border-color: #444;
+      }
+      .scan-hint {
+        font-size: 1.1rem;
+        color: #ff9800;
+        text-align: center;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .vc-meta {
+        background: #e7f4ff;
+        border-radius: 1vw;
+        padding: 1vw 1vw;
+        color: #356;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        line-height: 1.63;
+        border-left: 0.4vw solid #ffc107;
+        text-align: center;
+        word-break: break-all;
+        transition: 0.5s;
+      }
+      .theme-dark .vc-meta,
+      body.theme-dark .vc-meta {
+        background: #28292a;
+        color: #ffe082;
+        border-left: 0.4vw solid #ffd600;
+      }
+      .cid-highlight {
+        font-size: 1.17rem;
+        font-weight: 700;
+        color: #aa7c1b;
+        letter-spacing: 1px;
+        background: linear-gradient(90deg, #fff3cd 10%, #fffde7 90%);
+        border-radius: 0.9vw;
+        padding: 0.7vw 1.2vw;
+        display: inline-block;
+        margin: 0.4vw 0 1vw 0;
+        transition: 0.5s;
+        box-shadow: 0 0.3vw 2vw #ffe08222;
+      }
+      .theme-dark .cid-highlight,
+      body.theme-dark .cid-highlight {
+        background: linear-gradient(90deg, #463e13 10%, #665400 90%);
+        color: #ffc107;
+      }
+      .fade-in {
+        animation: fadeIn 0.7s;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(13px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      /* FAQ 彈窗-比例與暗色 */
+      .faq-pop {
+        background: #fffbe8;
+        border-radius: 1vw;
+        box-shadow: 0 2px 1.6vw #fce6aa99;
+        padding: 1.2vw 1.2vw;
+        position: fixed;
+        top: 12vh;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 15vw;
+        max-width: 95vw;
+        font-size: 0.98rem;
+        z-index: 99;
+        border: 0.16vw solid #ffe082;
+        color: #666;
+        display: none;
+      }
+      .faq-pop.active {
+        display: block;
+      }
+      .faq-btn {
+        background: none;
+        border: none;
+        font-size: 1.35rem;
+        color: #ffc107;
+        z-index: 100;
+        position: absolute;
+        top: 1.8vw;
+        left: 0.8vw;
+      }
+
+      /* 暗色的FAQ彈窗修正 */
+      .theme-dark .faq-pop,
+      body.theme-dark .faq-pop {
+        background: #2d3244;
+        color: #ffd600;
+        border-color: #ffd600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vc-card" id="VCApp">
+      <div class="theme-switch">
+        <input type="checkbox" id="themeToggler" />
+        <label for="themeToggler"
+          ><i class="fa-solid fa-circle-half-stroke me-1"></i> 暗色模式</label
+        >
+      </div>
+      <div class="header-main">
+        <i class="fa-solid fa-house-laptop"></i>校園請假憑證
+      </div>
+      <div class="header-sub">
+        Campus Leave Certificate - 發行端(API+互動DEMO)
+      </div>
+      <div class="tab-nav mb-2">
+        <button class="tab-btn active" onclick="tabSwitch('issue')">
+          <i class="fa-solid fa-certificate"></i>憑證發行
+        </button>
+        <button class="tab-btn" onclick="tabSwitch('history')">
+          <i class="fa-solid fa-clock-rotate-left"></i>發行紀錄
+        </button>
+        <button class="tab-btn" onclick="tabSwitch('help')">
+          <i class="fa-solid fa-circle-info"></i>說明FAQ
+        </button>
+      </div>
+      <div class="stepper mb-2" id="stepper-wrap">
+        <div id="step1" class="stepper-step active">1</div>
+        <div class="stepper-line">—</div>
+        <div id="step2" class="stepper-step">2</div>
+        <div class="stepper-line">—</div>
+        <div id="step3" class="stepper-step">3</div>
+      </div>
+      <div id="step-content" class="fade-in"></div>
+      <button class="faq-btn" id="faqBtn" onclick="showFaqPop()">
+        <i class="fa-solid fa-circle-question"></i>
+      </button>
+      <div class="faq-pop" id="faqPop">
+        <b>常見問題 FAQ</b><br />
+        <ul>
+          <li>如何領取請假憑證？<br />填寫表單並掃描QRcode即可。</li>
+          <li>憑證領取後 CID 有何用途？<br />可用於校方查驗真偽。</li>
+          <li>可以補領/撤銷嗎？<br />需由學校/醫院申請重發或撤銷。</li>
+          <li>若失敗或遺漏，重新操作即可。</li>
+        </ul>
+        <button
+          class="btn btn-outline-primary btn-sm w-100 mt-1"
+          onclick="hideFaqPop()"
+        >
+          關閉FAQ
+        </button>
+      </div>
+    </div>
+    <script>
+      document.getElementById("themeToggler").onchange = function (e) {
+        if (e.target.checked) document.body.classList.add("theme-dark");
+        else document.body.classList.remove("theme-dark");
+      };
+      function showFaqPop() {
+        document.getElementById("faqPop").classList.add("active");
+      }
+      function hideFaqPop() {
+        document.getElementById("faqPop").classList.remove("active");
+      }
+      let pollingInterval = null,
+        currentTransactionId = null;
+      let cid = "",
+        currentTab = "issue";
+      const historyItems = [
+        { date: "2025/11/01", sid: "A12345678", status: "成功" },
+        { date: "2025/10/28", sid: "B987654", status: "已撤銷" },
+        { date: "2025/10/23", sid: "X13322132", status: "成功" },
+      ];
+      function setActiveStep(s) {
+        for (let i = 1; i <= 3; i++) {
+          document
+            .getElementById("step" + i)
+            .classList.toggle("active", i === s);
+        }
+      }
+      tabSwitch("issue");
+      function tabSwitch(tab) {
+        currentTab = tab;
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.toggle(
+            "active",
+            btn.textContent.includes(
+              tab === "issue" ? "憑證" : tab === "history" ? "紀錄" : "FAQ"
+            )
+          );
+        });
+        document.getElementById("stepper-wrap").style.display =
+          tab === "issue" ? "flex" : "none";
+        document.getElementById("faqBtn").style.display =
+          tab === "help" ? "none" : "inline-block";
+        switch (tab) {
+          case "issue":
+            renderStep1();
+            break;
+          case "history":
+            renderHistory();
+            break;
+          case "help":
+            renderHelp();
+            break;
+        }
+      }
+      function renderStep1() {
+        setActiveStep(1);
+        document.getElementById("step-content").innerHTML = `
         <form id="vcForm" class="fade-in">
           <div class="mb-3">
             <label for="studentId" class="form-label">學號 <span class="text-danger">*</span></label>
@@ -183,40 +445,63 @@
         </form>
         <div id="form-alert" class="mt-2"></div>
       `;
-      document.getElementById("vcForm").onsubmit = function(event) {
-        event.preventDefault();
-        const studentId = document.getElementById("studentId").value.trim();
-        const name = document.getElementById("name").value.trim();
-        const className = document.getElementById("className").value.trim();
-        document.getElementById("form-alert").innerHTML = `<div class="alert alert-info mt-2 text-center">產生中...</div>`;
-        fetch("/api/generate-vc", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ student: studentId, name, class: className })
-        })
-        .then(res => res.json())
-        .then(result => {
-          if(result.success) {
-            currentTransactionId = result.transactionId;
-            renderStep2(studentId, name, className, result.qrCode, result.transactionId);
-          } else {
-            showFormAlert('憑證發行失敗：' + (result.error || '未知錯誤'), false);
-          }
-        })
-        .catch(() => {
-          showFormAlert('伺服器未回應，請檢查後端。', false);
-        });
+        document.getElementById("vcForm").onsubmit = function (event) {
+          event.preventDefault();
+          const studentId = document.getElementById("studentId").value.trim();
+          const name = document.getElementById("name").value.trim();
+          const className = document.getElementById("className").value.trim();
+          document.getElementById(
+            "form-alert"
+          ).innerHTML = `<div class="alert alert-info mt-2 text-center">產生中...</div>`;
+          fetch("/api/generate-vc", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              student: studentId,
+              name,
+              class: className,
+            }),
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              if (result.success) {
+                currentTransactionId = result.transactionId;
+                renderStep2(
+                  studentId,
+                  name,
+                  className,
+                  result.qrCode,
+                  result.transactionId
+                );
+              } else {
+                showFormAlert(
+                  "憑證發行失敗：" + (result.error || "未知錯誤"),
+                  false
+                );
+              }
+            })
+            .catch(() => {
+              showFormAlert("伺服器未回應，請檢查後端。", false);
+            });
+        };
       }
-    }
-    function showFormAlert(msg, isSuccess) {
-      document.getElementById("form-alert").innerHTML = `<div class="alert alert-${isSuccess ? "success" : "danger"}">${msg}</div>`;
-    }
-    function renderStep2(studentId, name, className, qrCode, transactionId) {
-      setActiveStep(2);
-      document.getElementById("step-content").innerHTML = `
+      function showFormAlert(msg, isSuccess) {
+        document.getElementById(
+          "form-alert"
+        ).innerHTML = `<div class="alert alert-${
+          isSuccess ? "success" : "danger"
+        }">${msg}</div>`;
+      }
+      function renderStep2(studentId, name, className, qrCode, transactionId) {
+        setActiveStep(2);
+        document.getElementById("step-content").innerHTML = `
         <div class="alert alert-success text-center fade-in mb-2">表單送出成功，請使用數位皮夾 App 掃描 QR Code 領取憑證！</div>
         <div class="qrcode-area fade-in">
-          <img alt="QRCode" src="${qrCode.startsWith("data:image/png;base64,") ? qrCode : "data:image/png;base64," + qrCode}">
+          <img alt="QRCode" src="${
+            qrCode.startsWith("data:image/png;base64,")
+              ? qrCode
+              : "data:image/png;base64," + qrCode
+          }">
         </div>
         <div class="vc-meta fade-in">
           <div>學號：<b>${studentId}</b></div>
@@ -226,11 +511,11 @@
         <div id="polling-status" class="mt-2 mb-3 text-secondary text-center fade-in">等待學生掃描領取憑證...</div>
         <div class="d-grid"><button class="btn btn-outline-secondary btn-sm w-100 mt-1" onclick="renderStep1()">← 重新操作</button></div>
       `;
-      startPolling();
-    }
-    function renderStep3(cid) {
-      setActiveStep(3);
-      document.getElementById("step-content").innerHTML = `
+        startPolling();
+      }
+      function renderStep3(cid) {
+        setActiveStep(3);
+        document.getElementById("step-content").innerHTML = `
         <div class="alert alert-success text-center fade-in mb-2">憑證發送成功，學生已領取！</div>
         <div class="cid-highlight fade-in">CID：${cid}</div>
         <div class="vc-meta fade-in" id="cidCopyZone">
@@ -239,54 +524,69 @@
         </div>
         <div class="d-grid"><button class="btn btn-primary w-100 mt-2" onclick="renderStep1()">發行下一張憑證</button></div>
       `;
-    }
-    function startPolling() {
-      if(pollingInterval) clearInterval(pollingInterval);
-      if(!currentTransactionId) return;
-      pollingInterval = setInterval(() => {
-        fetch(`/api/poll-transaction?transactionId=${currentTransactionId}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.received === true) {
-              clearInterval(pollingInterval);
-              renderStep3((data.cid || '（查無CID）'));
-            }
-          });
-      }, 3000);
-    }
-    function copyCID(cid) {
-      if(navigator.clipboard) {
-        navigator.clipboard.writeText(cid);
-        document.getElementById("cidCopyZone").insertAdjacentHTML('beforeend',
-          `<span style="color:#29b56a;font-size:.95rem;margin-left:8px;">已複製！</span>`);
-        setTimeout(()=>document.querySelector("#cidCopyZone span:last-child").remove(), 1200);
       }
-    }
-    function renderHistory() {
-      document.getElementById("step-content").innerHTML =
-        `<div class="vc-meta fade-in" style="background:#fffbe7;color:#ce9800;text-align:left;">
+      function startPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        if (!currentTransactionId) return;
+        pollingInterval = setInterval(() => {
+          fetch(`/api/poll-transaction?transactionId=${currentTransactionId}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.received === true) {
+                clearInterval(pollingInterval);
+                renderStep3(data.cid || "（查無CID）");
+              }
+            });
+        }, 3000);
+      }
+      function copyCID(cid) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(cid);
+          document
+            .getElementById("cidCopyZone")
+            .insertAdjacentHTML(
+              "beforeend",
+              `<span style="color:#29b56a;font-size:.95rem;margin-left:8px;">已複製！</span>`
+            );
+          setTimeout(
+            () =>
+              document.querySelector("#cidCopyZone span:last-child").remove(),
+            1200
+          );
+        }
+      }
+      function renderHistory() {
+        document.getElementById(
+          "step-content"
+        ).innerHTML = `<div class="vc-meta fade-in" style="text-align:left;">
           <i class="fa-solid fa-clock-rotate-left me-2"></i><b>發行紀錄：</b>
-          <ul style="list-style:square;padding-left:23px;margin-bottom:0;">
-            ${historyItems.map(item=>
-              `<li><b>${item.date}</b> 學號${item.sid} <span style="color:${item.status=='成功'?'#29b56a':'#ca2222'}">${item.status}</span></li>`
-            ).join('')}
+          <ul style="list-style:square;padding-left:2.3vw;margin-bottom:0;">
+            ${historyItems
+              .map(
+                (item) =>
+                  `<li><b>${item.date}</b> 學號${item.sid} <span style="color:${
+                    item.status == "成功" ? "#29b56a" : "#ca2222"
+                  }">${item.status}</span></li>`
+              )
+              .join("")}
           </ul>
         </div>
-        <div style="font-size:.99rem;color:#888;margin-top:18px;text-align:center;">僅顯示近期發行記錄</div>`;
-    }
-    function renderHelp() {
-      document.getElementById("step-content").innerHTML =
-        `<div class="vc-meta fade-in" style="background:#e7f4ff;text-align:left;">
+        <div style="font-size:.99rem;color:#888;margin-top:1.8vw;text-align:center;">僅顯示近期發行記錄</div>`;
+      }
+      function renderHelp() {
+        document.getElementById(
+          "step-content"
+        ).innerHTML = `<div class="vc-meta fade-in" style="text-align:left;">
           <i class="fa-solid fa-circle-info me-2"></i><b>常見問題 FAQ</b><br>
-          <ul style="padding-left:23px;margin-top:8px;">
+          <ul style="padding-left:2.3vw;margin-top:0.8vw;">
             <li><b>如何領取請假憑證？</b><br>填寫表單並掃描QRcode即可。</li>
             <li><b>CID有何用途？</b><br>可用於校方查驗真偽。</li>
             <li><b>如何補領/撤銷？</b><br>校方/醫院可重發或撤銷。</li>
             <li><b>失敗或遺漏怎麼辦？</b><br>重新操作即可。</li>
           </ul>
         </div>
-        <div style="font-size:.99rem;color:#888;margin-top:18px;text-align:center;">更多詳情請洽校證發行處或客服</div>`;
-    }
-  </script>
-</body>
+        <div style="font-size:.99rem;color:#888;margin-top:1.8vw;text-align:center;">更多詳情請洽校證發行處或客服</div>`;
+      }
+    </script>
+  </body>
 </html>
