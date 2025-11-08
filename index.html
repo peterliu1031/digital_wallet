@@ -498,6 +498,14 @@
         document.getElementById("step-content").innerHTML = `
       <form id="vcForm" class="fade-in">
         <div class="mb-3">
+          <label for="hospital" class="form-label">醫療機構</label>
+          <input type="text" class="form-control" id="hospital" value="抬大醫院" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="doctor" class="form-label">證明醫師</label>
+          <input type="text" class="form-control" id="doctor" value="賴普拿疼" readonly>
+        </div>
+        <div class="mb-3">
           <label for="studentId" class="form-label">學號 <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="studentId" required pattern="^[A-Za-z0-9]+$" title="僅允許英數字">
         </div>
@@ -604,21 +612,20 @@
         startPolling();
       }
 
-      function renderStep3(cid) {
+      function renderStep3(cid, studentId, name, className) {
         setActiveStep(3);
         document.getElementById("step-content").innerHTML = `
-    <div class="alert alert-success text-center fade-in mb-2">憑證發送成功，學生已領取！</div>
-    <div class="cid-highlight fade-in">CID：${cid}</div>
-    <div class="vc-meta fade-in" id="cidCopyZone">
-      <span class="me-2">複製憑證ID到剪貼簿</span>
-      <button class="btn btn-warning btn-sm" onclick="copyCID('${cid}')">複製</button>
-    </div>
-    <div id="revokeRes" class="mt-2"></div>
-    <div class="d-grid">
-      <button class="btn btn-danger w-100 mt-2" onclick="confirmRevoke('${cid}')">撤銷憑證</button>
-      <button class="btn btn-primary w-100 mt-2" onclick="renderStep1()">發行下一張憑證</button>
-    </div>
-  `;
+          <div class="alert alert-success text-center fade-in mb-2">憑證發送成功，學生已領取！</div>
+          <div class="cid-highlight fade-in">CID：${cid}</div>
+          <div class="vc-meta fade-in">
+            <div>醫療機構：<b>抬大醫院</b></div>
+            <div>證明醫師：<b>賴普拿疼</b></div>
+            <div>學號：<b>${studentId}</b></div>
+            <div>姓名：<b>${name}</b></div>
+            <div>班級：<b>${className}</b></div>
+          </div>
+          <!-- 其餘按鈕區不變 -->
+        `;
       }
 
       // 新增撤銷API流程function
