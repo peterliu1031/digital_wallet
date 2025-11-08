@@ -538,7 +538,8 @@
                   name,
                   className,
                   result.qrCode,
-                  result.transactionId
+                  result.transactionId,
+                  result.deepLink
                 );
               } else {
                 showFormAlert(
@@ -547,6 +548,7 @@
                 );
               }
             })
+
             .catch(() => {
               showFormAlert("伺服器未回應，請檢查後端。", false);
             });
