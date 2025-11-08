@@ -559,27 +559,49 @@
           isSuccess ? "success" : "danger"
         }">${msg}</div>`;
       }
-      function renderStep2(studentId, name, className, qrCode, transactionId) {
+      function renderStep2(
+        studentId,
+        name,
+        className,
+        qrCode,
+        transactionId,
+        deepLink
+      ) {
         setActiveStep(2);
         document.getElementById("step-content").innerHTML = `
-        <div class="alert alert-success text-center fade-in mb-2">表單送出成功，請使用數位皮夾 App 掃描 QR Code 領取憑證！</div>
-        <div class="qrcode-area fade-in">
-          <img alt="QRCode" src="${
-            qrCode.startsWith("data:image/png;base64,")
-              ? qrCode
-              : "data:image/png;base64," + qrCode
-          }">
-        </div>
-        <div class="vc-meta fade-in">
-          <div>學號：<b>${studentId}</b></div>
-          <div>姓名：<b>${name}</b></div>
-          <div>班級：<b>${className}</b></div>
-        </div>
-        <div id="polling-status" class="mt-2 mb-3 text-secondary text-center fade-in">等待學生掃描領取憑證...</div>
-        <div class="d-grid"><button class="btn btn-outline-secondary btn-sm w-100 mt-1" onclick="renderStep1()">← 重新操作</button></div>
-      `;
+    <div class="alert alert-success text-center fade-in mb-2">
+      表單送出成功，請使用數位皮夾 App 掃描 QR Code 領取憑證！
+    </div>
+    <div class="qrcode-area fade-in">
+      <img alt="QRCode" src="${
+        qrCode.startsWith("data:image/png;base64,")
+          ? qrCode
+          : "data:image/png;base64," + qrCode
+      }">
+    </div>
+    <div class="vc-meta fade-in">
+      <div>學號：<b>${studentId}</b></div>
+      <div>姓名：<b>${name}</b></div>
+      <div>班級：<b>${className}</b></div>
+    </div>
+    ${
+      deepLink
+        ? `
+      <div class="text-center mb-3">
+        <a href="${deepLink}" class="btn btn-success" style="font-size:1.09rem;" target="_blank">
+          <i class="fa-solid fa-mobile"></i> 直接開啟數位憑證皮夾APP領取
+        </a>
+        <div style="font-size:.99em;color:#888;margin-top:3px;">如手機沒掃到QRCode可直接點此連結</div>
+      </div>
+    `
+        : ""
+    }
+    <div id="polling-status" class="mt-2 mb-3 text-secondary text-center fade-in">等待學生掃描領取憑證...</div>
+    <div class="d-grid"><button class="btn btn-outline-secondary btn-sm w-100 mt-1" onclick="renderStep1()">← 重新操作</button></div>
+  `;
         startPolling();
       }
+
       function renderStep3(cid) {
         setActiveStep(3);
         document.getElementById("step-content").innerHTML = `
