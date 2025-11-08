@@ -2,103 +2,136 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>校園請假憑證發行端</title>
+  <title>校園請假憑證發行端 – 高互動動畫DEMO+API</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Bootstrap、Icon、Font、Lottie動畫 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://unpkg.com/lottie-web@5.10.2/build/player/lottie.min.js"></script>
   <style>
+    html,body {height:100%;min-height:100%;}
     body {
       background: linear-gradient(120deg, #e7f0fe 0%, #fffbe6 100%);
-      min-height: 100vh;
+      font-family: 'Noto Sans TC',sans-serif;
+      transition: background .5s;
     }
+    .theme-dark body, body.theme-dark {
+      background: linear-gradient(120deg,#191d24 0%,#2f2a36 100%) !important;
+      color: #ffe082!important;
+    }
+    .side-bg-lottie {
+      position:fixed;top:0;right:0;width:46vw;max-width:550px;height:100vh;z-index:0;pointer-events:none;overflow:hidden;
+    }
+    @media (max-width:870px){ .side-bg-lottie {display:none;} }
     .vc-card {
       background: #fff;
       border-radius: 18px;
-      box-shadow: 0 2px 24px 0 #b8d2df44;
-      max-width: 440px;
-      margin: 50px auto 0 auto;
-      padding: 38px 28px 20px 28px;
-      font-family: 'Noto Sans TC', sans-serif;
+      box-shadow: 0 2px 28px 0 #b8d2df44;
+      max-width: 98vw; width:440px;
+      margin: clamp(10px,7vw,54px) auto 38px auto;
+      padding: clamp(13px,6vw,38px);
+      min-height:450px;
+      position:relative; z-index:3;
+      transition: background .4s,color .4s;
+    }
+    .theme-dark .vc-card, body.theme-dark .vc-card {
+      background:#22282c;
+      color:#fde99c;
     }
     .header-main {
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #226b9a;
-      text-align: center;
-      letter-spacing: 3px;
-      margin-bottom: 2px;
+      font-size: 2.15rem;font-weight: 700;color: #226b9a;
+      text-align: center;letter-spacing: 3px;margin-bottom: 2px;transition:.5s;
     }
-    .header-sub {
-      font-size: .95rem;
-      color: #888;
-      text-align: center;
-      margin-bottom: 15px;
+    .theme-dark .header-main, body.theme-dark .header-main {color:#ffd600;}
+    .header-sub {font-size: .95rem;color: #888;text-align: center;margin-bottom: 15px;}
+    .theme-dark .header-sub, body.theme-dark .header-sub {color:#ffe082;}
+    .tab-nav {display:flex;justify-content:center;margin-bottom:14px;gap:18px;font-size:1.07rem;}
+    .tab-btn {background:none;border:none;color: #777;padding:5px 14px;border-radius:9px;font-weight:600;letter-spacing:1px;}
+    .tab-btn.active, .tab-btn:focus {background: #e0edf8;color: #226b9a;border: 1.5px solid #ffc107;box-shadow: 0 2px 8px #ffe9b3;}
+    .theme-dark .tab-btn.active, body.theme-dark .tab-btn.active,
+    .theme-dark .tab-btn:focus, body.theme-dark .tab-btn:focus {background: #2d3244;color: #ffe082;border-color:#ffe082;}
+    .theme-switch {position:absolute;top:15px;right:15px;z-index:24;}
+    .theme-switch input {display:none;}
+    .theme-switch label {
+      cursor:pointer;padding:6px 14px;border-radius:11px;color:#226b9a;background:#e7f4ff;
+      border:1.5px solid #a7daf6;font-weight:700;transition:background 0.2s; user-select:none;
     }
-    .stepper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 18px;
-      gap: 10px;
-    }
+    .theme-dark .theme-switch label, body.theme-dark .theme-switch label {background:#2f394d;color:#ffe082;border-color:#ffe082;}
+    .stepper {display: flex;align-items: center;justify-content: center;margin-bottom: 12px;gap: 10px;}
     .stepper-step {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: #e0edf8;
-      color: #226b9a;
-      font-weight: 700;
+      width: 25px; height: 25px; min-width:25px;border-radius: 50%; background: #e0edf8;
+      color: #226b9a; font-weight: 700; font-size: 1.06rem;border: 2px solid #e0edf8; transition: 0.3s;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
-      border: 2.5px solid #e0edf8;
-      transition: 0.3s;
     }
-    .stepper-step.active {
-      background: #fff;
-      border-color: #ffc107;
-      color: #b07913;
-      box-shadow: 0 2px 10px #ffe9b3;
-    }
-    .stepper-line {
-      font-size:1.5rem; color:#b8d2df;
-      margin: 0 5px;
-    }
+    .stepper-step.active {background: #fff;border-color: #ffc107;color: #b07913;box-shadow: 0 2px 7px #ffe9b3;}
+    .theme-dark .stepper-step, body.theme-dark .stepper-step {background:#35373b;color:#ffe082;border-color:#34343b;}
+    .theme-dark .stepper-step.active, body.theme-dark .stepper-step.active{background:#22292e;border-color:#ffe082;color:#ffe082;}
+    .stepper-line {font-size:1.23rem;color:#b8d2df;margin: 0 4px;}
+    .theme-dark .stepper-line, body.theme-dark .stepper-line {color:#38373d;}
     .qrcode-area img {
-      max-width: 220px;
-      margin: 0 auto 8px auto;
-      box-shadow: 0 2px 12px #BBD7E7;
-      border-radius: 10px;
+      width:clamp(128px,40vw,200px); max-width:220px; box-shadow: 0 2px 18px #BBD7E7;
+      border-radius: 13px;background: #f1f8fe;border: 5px solid #fffde7;margin:6px 0;transition:.3s;
+      animation: popQ .73s cubic-bezier(0.23,1.25,.48,.82);
     }
+    @keyframes popQ { from{transform:scale(.6) rotate(-8deg); opacity:0;} to{transform:none;opacity:1;}}
+    .theme-dark .qrcode-area img, body.theme-dark .qrcode-area img {background:#3d4146;border-color:#444;}
+    .scan-hint {font-size:1.1rem;color: #ff9800;text-align:center;margin-bottom: 6px;font-weight:600;}
     .vc-meta {
-      background: #e7f4ff;
-      border-radius: 14px;
-      padding: 15px 14px;
-      color: #356;
-      font-size: 1.1rem;
-      margin-bottom:10px;
-      line-height: 1.7;
-      border-left: 4px solid #ffc107;
-      font-family: 'Noto Sans TC', sans-serif;
+      background: #e7f4ff;border-radius: 14px;padding: 13px 11px;color: #356;
+      font-size: 1rem;margin-bottom:8px;line-height: 1.63;
+      border-left: 4px solid #ffc107;text-align: center;word-break:break-all;transition:.5s;
     }
+    .theme-dark .vc-meta, body.theme-dark .vc-meta {background:#28292a;color:#ffe082;border-left:4px solid #ffd600;}
     .cid-highlight {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #aa7c1b;
-      letter-spacing: 1px;
+      font-size: 1.17rem;font-weight: 700;color: #aa7c1b;letter-spacing: 1px;
       background: linear-gradient(90deg, #fff3cd 10%, #fffde7 90%);
-      border-radius: 10px;
-      padding: 8px 14px;
-      display: inline-block;
-      margin-top: 4px;
-      margin-bottom: 12px;
+      border-radius: 9px;padding: 7px 12px;display: inline-block;margin: 4px 0 10px 0;transition:.5s;
+      box-shadow:0 3px 22px #ffe08222
     }
-    .fade-in { animation: fadeIn .8s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px);} to {opacity: 1; transform: none;} }
+    .theme-dark .cid-highlight, body.theme-dark .cid-highlight {
+      background:linear-gradient(90deg,#463e13 10%,#665400 90%);
+      color:#ffc107;
+    }
+    .fade-in { animation: fadeIn .7s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(13px);} to {opacity: 1; transform: none;} }
+    .scan-btn {background: #ffb300;color: #fff;border: none;border-radius: 8px;font-weight: bold;
+      margin-top: 8px;padding: 8px 19px;font-size: 1.08rem;transition: background 0.2s;box-shadow: 0 1px 4px #ffecb3;}
+    .scan-btn:hover { background: #e6a000; }
+    .fa-id-card, .fa-user, .fa-users, .fa-house-laptop {margin-right:7px;color: #226b9a;}
+    .d-grid {margin:12px 0;}
+    .faq-pop {background:#fffbe8;border-radius:16px;box-shadow:0 2px 16px #fce6aa99;
+      padding:15px 16px;position:fixed;top:12vh;left:50%;transform:translateX(-50%);
+      min-width:219px;max-width:95vw;font-size:0.98rem;z-index:99;border:1.6px solid #ffe082;color:#666;display:none;}
+    .theme-dark .faq-pop, body.theme-dark .faq-pop{background:#373200;color:#ffe082;border-color:#fbe67e;}
+    .faq-pop.active {display:block;}
+    .faq-btn { background:none; border:none; font-size:1.35rem;color:#ffc107;z-index:100;position:absolute;top:18px;left:8px;}
+    @media (max-width:520px){
+      .vc-card {width:99vw; min-height:unset;padding:7px 2vw 13px 2vw;}
+      .header-main {font-size:1.25rem;}
+      .cid-highlight {font-size:0.94rem;}
+      .vc-meta, .faq-pop {font-size:0.90rem;}
+    }
   </style>
 </head>
 <body>
-  <div class="vc-card">
-    <div class="header-main">校園請假憑證</div>
-    <div class="header-sub">Campus Leave Certificate - 發行端</div>
-    <div class="stepper mb-4">
+  <!-- 高質感背景Lottie動畫 -->
+  <div class="side-bg-lottie">
+    <div id="bgLottie" style="width:430px;height:430px;position:absolute;right:-66px;top:130px;opacity:0.11"></div>
+  </div>
+  <div class="vc-card" id="VCApp">
+    <div class="theme-switch">
+      <input type="checkbox" id="themeToggler"/>
+      <label for="themeToggler"><i class="fa-solid fa-circle-half-stroke me-1"></i> 暗色模式</label>
+    </div>
+    <div class="header-main"><i class="fa-solid fa-house-laptop"></i>校園請假憑證</div>
+    <div class="header-sub">Campus Leave Certificate - 發行端(API+互動DEMO)</div>
+    <div class="tab-nav mb-2">
+      <button class="tab-btn active" onclick="tabSwitch('issue')"><i class="fa-solid fa-certificate"></i>憑證發行</button>
+      <button class="tab-btn" onclick="tabSwitch('history')"><i class="fa-solid fa-clock-rotate-left"></i>發行紀錄</button>
+      <button class="tab-btn" onclick="tabSwitch('help')"><i class="fa-solid fa-circle-info"></i>說明FAQ</button>
+    </div>
+    <div class="stepper mb-2" id="stepper-wrap">
       <div id="step1" class="stepper-step active">1</div>
       <div class="stepper-line">—</div>
       <div id="step2" class="stepper-step">2</div>
@@ -106,22 +139,60 @@
       <div id="step3" class="stepper-step">3</div>
     </div>
     <div id="step-content" class="fade-in"></div>
+    <!-- FAQ PopUp -->
+    <button class="faq-btn" id="faqBtn" onclick="showFaqPop()"><i class="fa-solid fa-circle-question"></i></button>
+    <div class="faq-pop" id="faqPop">
+      <b>常見問題 FAQ</b><br>
+      <ul>
+        <li>如何領取請假憑證？<br>填寫表單並掃描QRcode即可。</li>
+        <li>憑證領取後 CID 有何用途？<br>可用於校方查驗真偽。</li>
+        <li>可以補領/撤銷嗎？<br>需由學校/醫院申請重發或撤銷。</li>
+        <li>若失敗或遺漏，重新操作即可。</li>
+      </ul>
+      <button class="btn btn-outline-primary btn-sm w-100 mt-1" onclick="hideFaqPop()">關閉FAQ</button>
+    </div>
   </div>
   <script>
-    let step = 1;
-    let pollingInterval = null;
-    let currentTransactionId = null;
-    let cid = ''; // 憑證ID
-
-    renderStep1();
-
+    // 背景動畫
+    lottie.loadAnimation({container: document.getElementById('bgLottie'),renderer:'svg',loop:true,autoplay:true,path:'https://assets6.lottiefiles.com/packages/lf20_tno6cg2w.json'});
+    // 主題切換
+    document.getElementById("themeToggler").onchange = function(e){
+      if(e.target.checked) document.body.classList.add('theme-dark');
+      else document.body.classList.remove('theme-dark');
+    }
+    // FAQ浮窗
+    function showFaqPop(){document.getElementById("faqPop").classList.add("active");}
+    function hideFaqPop(){ document.getElementById("faqPop").classList.remove("active"); }
+    // tab管理
+    let pollingInterval = null, currentTransactionId = null;
+    let cid = '';
+    let currentTab = 'issue';
+    // 發行記錄DEMO
+    const historyItems = [
+      {date:'2025/11/01', sid:'A12345678', status:'成功'},
+      {date:'2025/10/28', sid:'B987654', status:'已撤銷'},
+      {date:'2025/10/23', sid:'X13322132', status:'成功'},
+    ];
     function setActiveStep(s) {
-      step = s;
       for(let i = 1; i <= 3; i++) {
         document.getElementById('step'+i).classList.toggle('active', i === s);
       }
     }
-
+    tabSwitch('issue');
+    function tabSwitch(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.classList.toggle('active', btn.textContent.includes(tab==='issue'?'憑證':tab==='history'?'紀錄':'FAQ'));
+      });
+      document.getElementById('stepper-wrap').style.display = tab==='issue'?"flex":"none";
+      document.getElementById('faqBtn').style.display = tab==='help'?'none':'inline-block';
+      switch(tab){
+        case 'issue': renderStep1(); break;
+        case 'history': renderHistory(); break;
+        case 'help': renderHelp(); break;
+      }
+    }
+    // ====== 發行流程整合flask API ===============================
     function renderStep1() {
       setActiveStep(1);
       document.getElementById("step-content").innerHTML = `
@@ -132,23 +203,23 @@
           </div>
           <div class="mb-3">
             <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="name" required pattern="^[\u4e00-\u9fa5A-Za-z0-9_]+$" title="僅允許中英文、數字與底線">
+            <input type="text" class="form-control" id="name" required pattern="^[\\u4e00-\\u9fa5A-Za-z0-9_]+$" title="僅允許中英文、數字與底線">
           </div>
           <div class="mb-3">
             <label for="className" class="form-label">班級 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="className" required pattern="^[\u4e00-\u9fa5]+$" title="僅允許中文">
+            <input type="text" class="form-control" id="className" required pattern="^[\\u4e00-\\u9fa5]+$" title="僅允許中文">
           </div>
           <button type="submit" class="btn btn-primary w-100">送出產生憑證 QRCode</button>
         </form>
         <div id="form-alert" class="mt-2"></div>
       `;
-
       document.getElementById("vcForm").onsubmit = function(event) {
         event.preventDefault();
         const studentId = document.getElementById("studentId").value.trim();
         const name = document.getElementById("name").value.trim();
         const className = document.getElementById("className").value.trim();
-
+        document.getElementById("form-alert").innerHTML = `<div class="alert alert-info mt-2 text-center">產生中...</div>`;
+        // 調用API ===================
         fetch("/api/generate-vc", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -168,7 +239,9 @@
         });
       }
     }
-
+    function showFormAlert(msg, isSuccess) {
+      document.getElementById("form-alert").innerHTML = `<div class="alert alert-${isSuccess ? "success" : "danger"}">${msg}</div>`;
+    }
     function renderStep2(studentId, name, className, qrCode, transactionId) {
       setActiveStep(2);
       document.getElementById("step-content").innerHTML = `
@@ -186,7 +259,6 @@
       `;
       startPolling();
     }
-
     function renderStep3(cid) {
       setActiveStep(3);
       document.getElementById("step-content").innerHTML = `
@@ -199,11 +271,6 @@
         <div class="d-grid"><button class="btn btn-primary w-100 mt-2" onclick="renderStep1()">發行下一張憑證</button></div>
       `;
     }
-
-    function showFormAlert(msg, isSuccess) {
-      document.getElementById("form-alert").innerHTML = `<div class="alert alert-${isSuccess ? "success" : "danger"}">${msg}</div>`;
-    }
-
     function startPolling() {
       if(pollingInterval) clearInterval(pollingInterval);
       if(!currentTransactionId) return;
@@ -218,7 +285,6 @@
           });
       }, 3000);
     }
-
     function copyCID(cid) {
       if(navigator.clipboard) {
         navigator.clipboard.writeText(cid);
@@ -226,6 +292,32 @@
           `<span style="color:#29b56a;font-size:.95rem;margin-left:8px;">已複製！</span>`);
         setTimeout(()=>document.querySelector("#cidCopyZone span:last-child").remove(), 1200);
       }
+    }
+    // =======demo紀錄/FAQ=========
+    function renderHistory() {
+      document.getElementById("step-content").innerHTML =
+        `<div class="vc-meta fade-in" style="background:#fffbe7;color:#ce9800;text-align:left;">
+          <i class="fa-solid fa-clock-rotate-left me-2"></i><b>發行紀錄：</b>
+          <ul style="list-style:square;padding-left:23px;margin-bottom:0;">
+            ${historyItems.map(item=>
+              `<li><b>${item.date}</b> 學號${item.sid} <span style="color:${item.status=='成功'?'#29b56a':'#ca2222'}">${item.status}</span></li>`
+            ).join('')}
+          </ul>
+        </div>
+        <div style="font-size:.99rem;color:#888;margin-top:18px;text-align:center;">僅顯示近期發行記錄</div>`;
+    }
+    function renderHelp() {
+      document.getElementById("step-content").innerHTML =
+        `<div class="vc-meta fade-in" style="background:#e7f4ff;text-align:left;">
+          <i class="fa-solid fa-circle-info me-2"></i><b>常見問題 FAQ</b><br>
+          <ul style="padding-left:23px;margin-top:8px;">
+            <li><b>如何領取請假憑證？</b><br>填寫表單並掃描QRcode即可。</li>
+            <li><b>CID有何用途？</b><br>可用於校方查驗真偽。</li>
+            <li><b>如何補領/撤銷？</b><br>校方/醫院可重發或撤銷。</li>
+            <li><b>失敗或遺漏怎麼辦？</b><br>重新操作即可。</li>
+          </ul>
+        </div>
+        <div style="font-size:.99rem;color:#888;margin-top:18px;text-align:center;">更多詳情請洽校證發行處或客服</div>`;
     }
   </script>
 </body>
